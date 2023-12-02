@@ -78,6 +78,9 @@ startSession();
 
 $import = function (array $directories) {
     foreach ($directories as $directory) {
+        $dir = __DIR__ . DIRECTORY_SEPARATOR . $directory;
+        if (!is_dir($dir) || !is_readable($dir)) continue;
+
         $subd = new \RecursiveDirectoryIterator(__DIR__ . DIRECTORY_SEPARATOR . $directory);
         $iterator = new \RecursiveIteratorIterator($subd);
         $files = new \RegexIterator($iterator, '/^.+\.(php|inc)$/i', RegexIterator::MATCH);

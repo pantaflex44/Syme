@@ -43,3 +43,11 @@ Route::before('article', function(Request $request, Response $response, Data $da
     $data->set('who am i ?', "I'm a midlleware ;-)");
 });
 ```
+
+<br /><br />
+<div style="text-align: center;">
+
+![Syme](./Syme.png)
+
+</div>
+<br />
