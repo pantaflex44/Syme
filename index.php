@@ -72,6 +72,14 @@ Route::post('home_post', '/', function (Request $request, Response $response, Ro
     return null;
 });
 
+Route::get('bob2', '/bob/{token}', function (string $token, Response $response): Response {
+    $response
+        ->writeObject($token)
+        ->withStatus(200);
+
+    return $response;
+});
+
 Route::get('bob', '/bob/{id:[0-9]+}/super/{name}', function (int $id, string $name, Response $response, Data $data, MyComponent $mc): Response {
     $obj = ['id' => $id, 'name' => $name];
     $obj = array_merge($obj, $data->all());
@@ -128,3 +136,5 @@ Route::after(null, function(array$attributes, Response $response): void {
     $response->append("je suis le middleware après le traitement de la route<br />");
     $response->append(json_encode($attributes));
 });
+
+

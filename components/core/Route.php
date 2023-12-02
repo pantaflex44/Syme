@@ -87,7 +87,7 @@ namespace components\core {
                         $paramName = trim($rule[0]);
                         $regexp = '';
                         if (count($rule) > 1) $regexp = trim($rule[1]);
-                        if (strlen($regexp) === 0) $regexp = '.+';
+                        if (strlen($regexp) === 0) $regexp = '[^\/.]+';
                         $node = '(?<' . preg_quote($paramName) . '>' . $regexp . ')';
                         $params[] = $paramName;
                     }
