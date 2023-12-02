@@ -5,6 +5,9 @@
 **Syme** est un petit framework PHP aidant à la réalisation d'applications Web. Simple et rapide, ce framework a été conçu pour accélérer le développement tout en restant modulaire et efficace. Applications Web, API Rest, Syme est l'outil incontournable de vos projets.
 
 
+Documentation: https://pantaflex44.gitbook.io/documentation-de-syme/
+
+
 ```php
 <?php
 
