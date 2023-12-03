@@ -267,6 +267,16 @@ namespace components\core {
             }
         }
 
+        /** Vide les données du contenu à renvoyer
+         * @return $this
+         */
+        public function clear(): Response
+        {
+            $this->body = "";
+            $this->contentType = 'text/html';
+            return $this;
+        }
+
         /** Enregistre un nouveau contenu
          * @param string $content Content to write
          * @return $this This instance

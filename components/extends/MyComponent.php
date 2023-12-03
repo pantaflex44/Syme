@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace components\custom {
+namespace components\extends {
 
     use components\core\Data;
     use components\core\Route;

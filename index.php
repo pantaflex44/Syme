@@ -24,6 +24,7 @@
 
 declare(strict_types=1);
 
+
 require_once './core.php';
 
 
@@ -31,11 +32,9 @@ use components\core\Data;
 use components\core\Request;
 use components\core\Response;
 use components\core\Route;
-use components\custom\MyComponent;
+use components\extends\MyComponent;
+use components\extends\TwigWrapper;
 use middlewares\CsrfMiddleware;
-
-
-
 
 
 Route::get('home_get', '/', function (Response $response): Response {
@@ -95,30 +94,15 @@ Route::before('bob', function (Request $request, Response $response, Data $data)
     $data->set('valeur de la donnée bob', $data->get('bob'));
 });
 
-Route::map(['GET', 'POST'], 'form', '/form', function (Request $request, Response $response): Response {
+Route::map(['GET', 'POST'], 'form', '/form', function (Request $request, Response $response, TwigWrapper $twig): Response {
     if ($request->getMethod() === 'POST' && $request->hasForm()) {
         $response->writeObject($request->getForm());
 
     } else {
-        $response->write('
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>title</title>
-  </head>
-  <body>
-    <form method="post">
-        <input type="text" name="input1[]" value="" />
-        <input type="text" name="input1[]" value="" />
-        <input type="range" name="range1" min="0" max="100" value="50" />
-        <input type="date" name="date" value="" />
-        <input type="submit" name="submit" value="ok" />
-    </form>
-  </body>
-</html>
-        ');
-
+        // modifie automatiquement le contenu de la réponse courante
+        $twig->renderToResponse('form.html', [
+            'title' => "Syme"
+        ]);
     }
 
     return $response;
@@ -129,12 +113,13 @@ Route::get('home', '/{name}', function (Response $response, Data $data): Respons
     $response->write("je suis le traitement de la route<br />");
     return $response;
 });
-Route::before('home', function(Response $response): void {
+Route::before('home', function (Response $response): void {
     $response->prepend("je suis le middleware avant le traitement de la route<br />");
 });
-Route::after(null, function(array$attributes, Response $response): void {
+Route::after(null, function (array $attributes, Response $response): void {
     $response->append("je suis le middleware après le traitement de la route<br />");
     $response->append(json_encode($attributes));
 });
+
 
 

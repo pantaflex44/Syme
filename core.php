@@ -29,6 +29,9 @@ if (!file_exists($configFile) || !is_readable($configFile)) $configFile = __DIR_
 require_once $configFile;
 require_once __DIR__ . '/functions.php';
 
+$vendorAutoloader = __DIR__ . '/vendor';
+if (is_dir($vendorAutoloader)) require_once $vendorAutoloader . '/autoload.php';
+
 ini_set('default_charset', 'UTF-8');
 ini_set('error_prepend_string', '<pre>');
 ini_set('error_append_string', '</pre>');

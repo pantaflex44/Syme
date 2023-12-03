@@ -16,3 +16,6 @@
 .git
 .idea
 /config.local.php
+/composer.lock
+/vendor
+/templates/cache
