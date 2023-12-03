@@ -26,3 +26,4 @@
   * [UploadedFile: Les fichiers transmis](les-objets/uploadedfile-les-fichiers-transmis.md)
 * [Aller plus loin](aller-plus-loin/README.md)
   * [Les composants](aller-plus-loin/les-composants.md)
+  * [Les modèles de vues (Templates)](aller-plus-loin/les-modeles-de-vues-templates.md)
