@@ -47,18 +47,6 @@ ini_set('error_log', realpath(__DIR__ . 'error.log'));
 ini_set('display_errors', DEBUG);
 ini_set('display_startup_errors', DEBUG);
 error_reporting(DEBUG ? E_ALL : E_ALL & ~E_DEPRECATED & ~E_STRICT);
-ini_set('session.use_cookies', 1);
-ini_set('session.use_only_cookies', 1);
-ini_set('session.use_strict_mode', 1);
-ini_set('session.cookie_httponly', 1);
-ini_set('session.cookie_secure', 1);
-ini_set('session.cookie_samesite', 'Strict');
-ini_set('session.use_trans_id', 0);
-ini_set('session.cache_limiter', 'nocache');
-ini_set('session.url_rewriter_tags', 0);
-ini_set('session.cookie_lifetime', 0);
-ini_set('session.cookie_path', '/');
-startSession();
 
 $import = function (array $directories): void {
     foreach ($directories as $directory) {

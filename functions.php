@@ -60,55 +60,6 @@ function getRealIp(): string {
     return $_SERVER['HTTP_CLIENT_IP'] ?? $_SERVER["HTTP_CF_CONNECTING_IP"] ?? $_SERVER['HTTP_X_FORWARDED'] ?? $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['HTTP_FORWARDED'] ?? $_SERVER['HTTP_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
 }
 
-/** Arrête et nettoie le gestionnaire de session
- * @return void
- */
-function clearSession(): void {
-    $_SESSION = [];
-
-    $params = session_get_cookie_params();
-    setcookie(
-            session_name(),
-            '',
-            time() - 42000,
-            $params['path'],
-            $params['domain'],
-            $params['secure'],
-            $params['httponly']
-    );
-
-    session_unset();
-    session_destroy();
-}
-
-/** Démarre le gestionnaire de session
- * @return void
- */
-function startSession(): void {
-    session_name(CORE_NAME);
-    session_start();
-
-    $valid = true;
-
-    if (isset($_SESSION['REMOTE_ADDR'])) {
-        $valid &= ($_SESSION['REMOTE_ADDR'] == getRealIp());
-    } else {
-        $_SESSION['REMOTE_ADDR'] = getRealIp();
-    }
-
-    if (isset($_SESSION['HTTP_USER_AGENT'])) {
-        $valid &= ($_SESSION['HTTP_USER_AGENT'] == $_SERVER['HTTP_USER_AGENT']);
-    } else {
-        $_SESSION['HTTP_USER_AGENT'] = $_SERVER['HTTP_USER_AGENT'];
-    }
-
-    if (!$valid) {
-        clearSession();
-        startSession();
-        exit;
-    }
-}
-
 /** Adapte le type de la valeur passée en paramètre en fonction du type de sa valeur
  * @param string|array $value Valeur à adapter
  * @param bool $sanitize
