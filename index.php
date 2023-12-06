@@ -29,10 +29,13 @@ use components\core\Data;
 use components\core\Request;
 use components\core\Response;
 use components\core\Route;
+use components\extended\Session;
 use components\extended\TwigWrapper;
 use middlewares\CsrfMiddleware;
 
-Route::get('home_get', '/', function (Response $response): Response {
+Route::get('home_get', '/', function (Response $response, Session $session): Response {
+    $session->my_flag = "Je suis une donnee de session. Visiter /{name} pour en connaitre la valeur!";
+
     $response
             ->write('
 <!DOCTYPE html>
@@ -42,28 +45,12 @@ Route::get('home_get', '/', function (Response $response): Response {
     <title>title</title>
   </head>
   <body>
-    <form method="post">
-        <input type="text" name="input1[]" value="" />
-        <input type="text" name="input1[]" value="" />
-        <input type="range" name="range1" min="0" max="100" value="50" />
-        <input type="date" name="date" value="" />
-        <input type="submit" name="submit" value="ok" />
-    </form>
+    Bonjour vous!
   </body>
 </html>
         ');
 
     return $response;
-});
-Route::post('home_post', '/', function (Request $request, Response $response, Route $route): null|Response {
-    if ($route::redirect('home_get') === false) {
-        $response
-                ->writeObject($request->getForm());
-
-        return $response;
-    }
-
-    return null;
 });
 
 Route::get('bob2', '/bob/{token}', function (string $token, Response $response): Response {
@@ -85,7 +72,7 @@ Route::get('bob', '/bob/{id:[0-9]+}/super/{name}', function (int $id, string $na
 });
 Route::before('bob', CsrfMiddleware::class);
 Route::before('bob', function (Request $request, Response $response, Data $data): void {
-    $data->set('valeur de la donnée bob', $data->get('bob'));
+    $data->set('valeur de la donnee bob', $data->get('bob'));
 });
 
 Route::map(['GET', 'POST'], 'form', '/form', function (Request $request, Response $response, TwigWrapper $twig): Response {
@@ -101,8 +88,13 @@ Route::map(['GET', 'POST'], 'form', '/form', function (Request $request, Respons
     return $response;
 });
 
-Route::get('home', '/{name}', function (Response $response, Data $data): Response {
-    $response->write("je suis le traitement de la route<br />");
+Route::get('home', '/{name}', function (string $name, Response $response, Data $data, Session $session): Response {
+    $response->writeObject([
+        "je suis l'attribut d'url 'name': $name",
+        "je suis le traitement de la route",
+        $session->my_flag,
+        $data->all()
+    ]);
     return $response;
 });
 Route::before('home', function (Response $response): void {

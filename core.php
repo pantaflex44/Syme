@@ -69,7 +69,8 @@ $import = function (array $directories): void {
             // puis recherche si la fonction statique __required est présente. Si oui, on mémorise
             // la structure permettant de l'invoquer une fois tous les fichiers inclus.
             try {
-                $class = new ReflectionClass(get_classname_in_phpfile($file->getPathname()));
+                $className = get_classname_in_phpfile($file->getPathname());
+                $class = new ReflectionClass($className);
                 if ($class->hasMethod('__required')) {
                     $requiredMethods[] = [
                         'method' => $class->getMethod('__required'),

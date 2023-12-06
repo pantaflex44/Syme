@@ -21,15 +21,13 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-
 declare(strict_types=1);
 
 namespace components\core {
 
     use JetBrains\PhpStorm\NoReturn;
 
-    class Route
-    {
+    class Route {
 
         /**
          * @var array $routes Liste des routes enregistrées
@@ -53,32 +51,38 @@ namespace components\core {
          * @param callable $callback Function à appeler en cas de détection de la route
          * @return bool true, la nouvelle règle est enregistrée, sinon, false
          */
-        private static function store(string $name, array $methods, string $uri, callable $callback): bool
-        {
+        private static function store(string $name, array $methods, string $uri, callable $callback): bool {
             $name = strtolower(trim($name));
-            if (self::exists($name)) return false;
+            if (self::exists($name))
+                return false;
 
             $methods = array_filter(
-                array_map(
-                    fn($m) => strtoupper(trim($m)),
-                    $methods
-                ),
-                fn($m) => $m === 'GET' || $m === 'POST' || $m === 'PUT' || $m === 'PATCH' || $m === 'DELETE'
+                    array_map(
+                            fn($m) => strtoupper(trim($m)),
+                            $methods
+                    ),
+                    fn($m) => $m === 'GET' || $m === 'POST' || $m === 'PUT' || $m === 'PATCH' || $m === 'DELETE'
             );
-            if (count($methods) === 0) return false;
+            if (count($methods) === 0)
+                return false;
 
             $uri = trim($uri);
-            if (!str_starts_with($uri, '/')) $uri = '/' . $uri;
-            if (str_ends_with($uri, '/')) $uri = substr($uri, 0, strlen($uri) - 1);
-            if (self::isLinked($uri, $methods)) return false;
+            if (!str_starts_with($uri, '/'))
+                $uri = '/' . $uri;
+            if (str_ends_with($uri, '/'))
+                $uri = substr($uri, 0, strlen($uri) - 1);
+            if (self::isLinked($uri, $methods))
+                return false;
 
-            if (!is_callable($callback)) return false;
+            if (!is_callable($callback))
+                return false;
 
             $route = [];
             $params = [];
             $parsed = explode('/', $uri);
             foreach ($parsed as $node) {
-                if (trim($node) === '') continue;
+                if (trim($node) === '')
+                    continue;
 
                 if (str_starts_with($node, '{') && str_ends_with($node, '}')) {
                     $node = trim(substr($node, 1, strlen($node) - 2));
@@ -86,8 +90,10 @@ namespace components\core {
                     if (count($rule) > 0) {
                         $paramName = trim($rule[0]);
                         $regexp = '';
-                        if (count($rule) > 1) $regexp = trim($rule[1]);
-                        if (strlen($regexp) === 0) $regexp = '[^\/.]+';
+                        if (count($rule) > 1)
+                            $regexp = trim($rule[1]);
+                        if (strlen($regexp) === 0)
+                            $regexp = '[^\/.]+';
                         $node = '(?<' . preg_quote($paramName) . '>' . $regexp . ')';
                         $params[] = $paramName;
                     }
@@ -98,7 +104,8 @@ namespace components\core {
                 $route[] = $node;
             }
             $route = implode('/', $route);
-            if (!str_starts_with($route, '/')) $route = '/' . $route;
+            if (!str_starts_with($route, '/'))
+                $route = '/' . $route;
             $route = '#^' . $route . '$#i';
 
             self::$routes[$name] = [
@@ -118,12 +125,14 @@ namespace components\core {
          * @param callable|string $middleware Middleware à ajouter
          * @return void
          */
-        private static function add(string $order, ?string $routeName, callable|string $middleware): void
-        {
-            if (is_null($routeName)) $routeName = '_';
+        private static function add(string $order, ?string $routeName, callable|string $middleware): void {
+            if (is_null($routeName))
+                $routeName = '_';
 
-            if ($routeName !== '_' && !self::exists($routeName)) return;
-            if (!isset(self::$middlewares[$order][$routeName])) self::$middlewares[$order][$routeName] = [];
+            if ($routeName !== '_' && !self::exists($routeName))
+                return;
+            if (!isset(self::$middlewares[$order][$routeName]))
+                self::$middlewares[$order][$routeName] = [];
 
             self::$middlewares[$order][$routeName][] = $middleware;
         }
@@ -137,11 +146,10 @@ namespace components\core {
          * @return void
          * @throws \ReflectionException
          */
-        private static function applyMiddleware(string $order, string $routeName, Request &$request, Response &$response, Data &$data, array $namedParameters = []): void
-        {
+        private static function applyMiddleware(string $order, string $routeName, Request &$request, Response &$response, Data &$data, array $namedParameters = []): void {
             $middlewares = array_merge(
-                self::$middlewares[$order][$routeName] ?? [],
-                self::$middlewares[$order]['_'] ?? []
+                    self::$middlewares[$order][$routeName] ?? [],
+                    self::$middlewares[$order]['_'] ?? []
             );
 
             foreach ($middlewares as $middleware) {
@@ -173,8 +181,7 @@ namespace components\core {
          * @param Data $data Données personnelles
          * @return void
          */
-        private static function applyBeforeMiddleware(string $routeName, Request &$request, Response &$response, Data &$data, array $namedParameters = []): void
-        {
+        private static function applyBeforeMiddleware(string $routeName, Request &$request, Response &$response, Data &$data, array $namedParameters = []): void {
             self::applyMiddleware('before', $routeName, $request, $response, $data, $namedParameters);
         }
 
@@ -186,8 +193,7 @@ namespace components\core {
          * @return void
          * @throws \ReflectionException
          */
-        private static function applyAfterMiddleware(string $routeName, Request &$request, Response &$response, Data &$data, array $namedParameters = []): void
-        {
+        private static function applyAfterMiddleware(string $routeName, Request &$request, Response &$response, Data &$data, array $namedParameters = []): void {
             self::applyMiddleware('after', $routeName, $request, $response, $data, $namedParameters);
         }
 
@@ -198,9 +204,9 @@ namespace components\core {
          * @return array Tableau associatif des dépendances injectées
          * @throws \ReflectionException
          */
-        private static function paramsInjection(\ReflectionFunction|\ReflectionMethod|null $method, array $typeDependencies = [], array $nameDependencies = []): array
-        {
-            if (is_null($method)) return [];
+        private static function paramsInjection(\ReflectionFunction|\ReflectionMethod|null $method, array $typeDependencies = [], array $nameDependencies = []): array {
+            if (is_null($method))
+                return [];
 
             $components = array_keys(self::$components);
             $params = [];
@@ -226,7 +232,8 @@ namespace components\core {
                 }
             }
 
-            if ($hasAttributesParameter) $params['attributes'] = $nameDependencies;
+            if ($hasAttributesParameter)
+                $params['attributes'] = $nameDependencies;
 
             return $params;
         }
@@ -235,17 +242,16 @@ namespace components\core {
          * @param string $class Nom complet de la classe à ajouter
          * @return void
          */
-        public static function extendWith(string $class): void
-        {
-            if (trim($class) !== '' && !isset(self::$components[$class])) self::$components[$class] = null;
+        public static function extendWith(string $class): void {
+            if (trim($class) !== '' && !isset(self::$components[$class]))
+                self::$components[$class] = null;
         }
 
         /** Si une requète correspond à la demande d'un asset, on renvoie le chemin du fichier
          * @param Request $request Requète correspondante
          * @return false false, si l'asset n'éxiste pas, sinon, le chemin du fichier
          */
-        public static function isAsset(Request $request): string|false
-        {
+        public static function isAsset(Request $request): string|false {
             $uri = $request->getUri();
             $filepath = ASSETS_PATH . $uri;
             return is_file($filepath) && is_readable($filepath) ? $filepath : false;
@@ -255,8 +261,7 @@ namespace components\core {
          * @param string $filepath Chemin du fichier à envoyer
          * @return void
          */
-        #[NoReturn] public static function sendAsset(string $filepath): void
-        {
+        #[NoReturn] public static function sendAsset(string $filepath): void {
             $mimetype = mime_content_type($filepath);
             $size = filesize($filepath);
             $time = date('r', filemtime($filepath));
@@ -273,7 +278,8 @@ namespace components\core {
             if (!is_null($range)) {
                 if (preg_match('/bytes=\h*(\d+)-(\d*)[\D.*]?/i', $range, $matches)) {
                     $begin = intval($matches[1]);
-                    if (!empty($matches[2])) $end = intval($matches[2]);
+                    if (!empty($matches[2]))
+                        $end = intval($matches[2]);
                 }
                 header('HTTP/1.1 206 Partial Content');
             } else {
@@ -285,7 +291,8 @@ namespace components\core {
             header('Pragma: no-cache');
             header('Accept-Ranges: bytes');
             header('Content-Length:' . (($end - $begin) + 1));
-            if (!is_null($range)) header("Content-Range: bytes $begin-$end/$size");
+            if (!is_null($range))
+                header("Content-Range: bytes $begin-$end/$size");
             header('Content-Disposition: inline; filename=' . basename($filepath));
             header("Content-Transfer-Encoding: binary");
             header("Last-Modified: $time");
@@ -306,8 +313,7 @@ namespace components\core {
          * @param string $routeName Nom de la route
          * @return bool true, la route existe, sinon, false
          */
-        public static function exists(string $routeName): bool
-        {
+        public static function exists(string $routeName): bool {
             $routeName = strtolower(trim($routeName));
 
             return in_array($routeName, array_keys(self::$routes));
@@ -317,16 +323,16 @@ namespace components\core {
          * @param string $routeName Nom de la route
          * @return array|false Détails de la règle, ou false si la route n'éxiste pas
          */
-        public static function match(string $routeName): array|false
-        {
+        public static function match(string $routeName): array|false {
             $routeName = strtolower(trim($routeName));
 
             foreach (self::$routes as $name => $details) {
-                if ($name === $routeName) return [
-                    'methods' => $details['methods'],
-                    'uri' => $details['uri'],
-                    'callback' => $details['callback']
-                ];
+                if ($name === $routeName)
+                    return [
+                        'methods' => $details['methods'],
+                        'uri' => $details['uri'],
+                        'callback' => $details['callback']
+                    ];
             }
 
             return false;
@@ -336,16 +342,18 @@ namespace components\core {
          * @param string $uri Chemin à tester
          * @return bool true, le chemin est lié, sinon, false
          */
-        public static function isLinked(string $uri, array $methods = ['GET', 'POST', 'OPTIONS', 'PUT', 'PATCH', 'DELETE']): bool
-        {
+        public static function isLinked(string $uri, array $methods = ['GET', 'POST', 'OPTIONS', 'PUT', 'PATCH', 'DELETE']): bool {
             $uri = trim($uri);
-            if (!str_starts_with($uri, '/')) $uri = '/' . $uri;
-            if (str_ends_with($uri, '/')) $uri = substr($uri, 0, strlen($uri) - 1);
+            if (!str_starts_with($uri, '/'))
+                $uri = '/' . $uri;
+            if (str_ends_with($uri, '/'))
+                $uri = substr($uri, 0, strlen($uri) - 1);
 
             foreach (self::$routes as $name => $details) {
                 if (strtolower($details['uri']) === strtolower($uri)) {
                     foreach ($methods as $method) {
-                        if (in_array($method, $details['methods'])) return true;
+                        if (in_array($method, $details['methods']))
+                            return true;
                     }
                 }
             }
@@ -361,8 +369,7 @@ namespace components\core {
          * @param array $params Attributs de la route
          * @return string|false Chemin préparé de la route, ou false en cas d'erreur
          */
-        public static function getUri(string $routeName, array $params = []): string|false
-        {
+        public static function getUri(string $routeName, array $params = []): string|false {
             $found = null;
             $routeName = strtolower(trim($routeName));
 
@@ -373,17 +380,20 @@ namespace components\core {
                 }
             }
 
-            if (is_null($found)) return false;
+            if (is_null($found))
+                return false;
 
             $filteredParams = [];
             foreach ($params as $key => $value) {
-                if (in_array($key, $found['params'])) $filteredParams[$key] = $value;
+                if (in_array($key, $found['params']))
+                    $filteredParams[$key] = $value;
             }
 
             $uri = [];
             $parsed = explode('/', $found['uri']);
             foreach ($parsed as $node) {
-                if (trim($node) === '') continue;
+                if (trim($node) === '')
+                    continue;
 
                 if (str_starts_with($node, '{') && str_ends_with($node, '}')) {
                     $node = trim(substr($node, 1, strlen($node) - 2));
@@ -401,7 +411,8 @@ namespace components\core {
                 $uri[] = $node;
             }
             $uri = implode('/', $uri);
-            if (!str_starts_with($uri, '/')) $uri = '/' . $uri;
+            if (!str_starts_with($uri, '/'))
+                $uri = '/' . $uri;
 
             return $uri;
         }
@@ -414,14 +425,16 @@ namespace components\core {
          * @param array $params Attributs de la route
          * @return string|false Chemin complet et préparé de la route, ou false en cas d'erreur
          */
-        public static function getPath(string $routeName, array $params = []): string|false
-        {
+        public static function getPath(string $routeName, array $params = []): string|false {
             $uri = self::getUri($routeName, $params);
-            if ($uri === false) return false;
+            if ($uri === false)
+                return false;
 
             $root = trim(dirname($_SERVER['SCRIPT_NAME']));
-            if (str_ends_with($root, '/')) $root = substr($root, 0, strlen($root) - 1);
-            if (!str_starts_with($root, '/')) $root = '/' . $root;
+            if (str_ends_with($root, '/'))
+                $root = substr($root, 0, strlen($root) - 1);
+            if (!str_starts_with($root, '/'))
+                $root = '/' . $root;
 
             return $root . $uri;
         }
@@ -434,10 +447,10 @@ namespace components\core {
          * @param array $params Attributs de la route
          * @return string|false Url complète et préparée de la route, ou false en cas d'erreur
          */
-        public static function getUrl(string $routeName, array $params = []): string|false
-        {
+        public static function getUrl(string $routeName, array $params = []): string|false {
             $path = self::getPath($routeName, $params);
-            if ($path === false) return false;
+            if ($path === false)
+                return false;
 
             $host = (empty($_SERVER['HTTPS']) ? 'http' : 'https') . "://$_SERVER[HTTP_HOST]";
 
@@ -449,10 +462,10 @@ namespace components\core {
          * @param array $params Attributs de la route
          * @return Request|false Requète, ou, false en cas d'erreur
          */
-        public static function toRequest(string $routeName, array $params = []): Request|false
-        {
+        public static function toRequest(string $routeName, array $params = []): Request|false {
             $url = self::getUrl($routeName, $params);
-            if ($url === false) return false;
+            if ($url === false)
+                return false;
 
             return new Request($url);
         }
@@ -462,10 +475,10 @@ namespace components\core {
          * @param array $params Attributs de la route
          * @return false false en cas d'erreur
          */
-        public static function redirect(string $routeName, array $params = [], int $status = 302): false
-        {
+        public static function redirect(string $routeName, array $params = [], int $status = 302): false {
             $url = self::getUrl($routeName, $params);
-            if ($url === false) return false;
+            if ($url === false)
+                return false;
 
             header("Location: $url", true, $status);
             exit();
@@ -476,8 +489,7 @@ namespace components\core {
          * @return array Response déduite à envoyer
          * @throws \ReflectionException
          */
-        public static function apply(Request $request): array
-        {
+        public static function apply(Request $request): array {
             $found = false;
             $called = false;
 
@@ -485,7 +497,8 @@ namespace components\core {
             $response = new Response();
 
             foreach (self::$routes as $name => $details) {
-                if (!in_array($request->getMethod(), $details['methods'])) continue;
+                if (!in_array($request->getMethod(), $details['methods']))
+                    continue;
 
                 if (preg_match($details['route'], $request->getUri(), $matches, PREG_UNMATCHED_AS_NULL)) {
                     $found = true;
@@ -503,11 +516,11 @@ namespace components\core {
 
                         $func = new \ReflectionFunction($details['callback']);
                         $params = self::paramsInjection($func, [
-                            Route::class => new self(),
-                            Request::class => $request,
-                            Response::class => $response,
-                            Data::class => $data
-                        ], $callbackParams);
+                                    Route::class => new self(),
+                                    Request::class => $request,
+                                    Response::class => $response,
+                                    Data::class => $data
+                                        ], $callbackParams);
                         $response = $func->invokeArgs($params);
 
                         self::applyAfterMiddleware($name, $request, $response, $data, $callbackParams);
@@ -538,33 +551,30 @@ namespace components\core {
          * @param Response $response Réponse déduite de la requète
          * @return void
          */
-        #[NoReturn] public static function sendResponse(Request $initialRequest, null|Response $response): void
-        {
+        #[NoReturn] public static function sendResponse(Request $initialRequest, null|Response $response): void {
             if (is_null($response)) {
                 header('HTTP/1.1 500 Internal server error');
                 exit();
             }
 
-            $gzipAccepted = USE_COMPRESSION
-                && in_array('gzip', $initialRequest->getAcceptedEncoding())
-                && strlen($response->getContent()) >= 2048;
+            $gzipAccepted = USE_COMPRESSION && in_array('gzip', $initialRequest->getAcceptedEncoding()) && strlen($response->getContent()) >= 2048;
             $content = $gzipAccepted ? $response->getGzipContent() : $response->getContent();
             $length = strlen($content);
 
             $etag = md5($content);
             header('Vary: If-None-Match');
-            if ($gzipAccepted) header('Content-Encoding: gzip');
+            if ($gzipAccepted)
+                header('Content-Encoding: gzip');
 
             $if_none_match = ($_SERVER['HTTP_IF_NONE_MATCH'] ?? '') === $etag;
             $if_modified_since = $_SERVER['HTTP_IF_MODIFIED_SINCE'] ?? false;
-            if (USE_CACHE
-                && $if_none_match
-                && ($if_modified_since === false || ($if_modified_since && (strtotime($if_modified_since) + CACHE_DELAY) > time()))) {
+            if (USE_CACHE && $if_none_match && ($if_modified_since === false || ($if_modified_since && (strtotime($if_modified_since) + CACHE_DELAY) > time()))) {
                 header('HTTP/1.1 304 Not Modified');
                 exit();
             }
 
-            foreach ($response->getHeaders() as $header) header($header, false);
+            foreach ($response->getHeaders() as $header)
+                header($header, false);
 
             $lastModified = gmdate('D, d M Y H:i:s ', time()) . ' GMT';
             $expires = gmdate('D, d M Y H:i:s ', time() + CACHE_DELAY) . ' GMT';
@@ -594,8 +604,7 @@ namespace components\core {
          * @param callable $callback Fonction à appeler en cas de détection
          * @return void
          */
-        public static function any(string $name, string $uri, callable $callback): void
-        {
+        public static function any(string $name, string $uri, callable $callback): void {
             self::store($name, ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'], $uri, $callback);
         }
 
@@ -611,8 +620,7 @@ namespace components\core {
          * @param callable $callback Fonction à appeler en cas de détection
          * @return void
          */
-        public static function map(array $methods, string $name, string $uri, callable $callback): void
-        {
+        public static function map(array $methods, string $name, string $uri, callable $callback): void {
             self::store($name, $methods, $uri, $callback);
         }
 
@@ -628,8 +636,7 @@ namespace components\core {
          * @param callable $callback Fonction à appeler en cas de détection
          * @return void
          */
-        public static function get(string $name, string $uri, callable $callback): void
-        {
+        public static function get(string $name, string $uri, callable $callback): void {
             self::store($name, ['GET'], $uri, $callback);
         }
 
@@ -645,8 +652,7 @@ namespace components\core {
          * @param callable $callback Fonction à appeler en cas de détection
          * @return void
          */
-        public static function post(string $name, string $uri, callable $callback): void
-        {
+        public static function post(string $name, string $uri, callable $callback): void {
             self::store($name, ['POST'], $uri, $callback);
         }
 
@@ -662,8 +668,7 @@ namespace components\core {
          * @param callable $callback Fonction à appeler en cas de détection
          * @return void
          */
-        public static function put(string $name, string $uri, callable $callback): void
-        {
+        public static function put(string $name, string $uri, callable $callback): void {
             self::store($name, ['PUT'], $uri, $callback);
         }
 
@@ -679,8 +684,7 @@ namespace components\core {
          * @param callable $callback Fonction à appeler en cas de détection
          * @return void
          */
-        public static function patch(string $name, string $uri, callable $callback): void
-        {
+        public static function patch(string $name, string $uri, callable $callback): void {
             self::store($name, ['PATCH'], $uri, $callback);
         }
 
@@ -696,8 +700,7 @@ namespace components\core {
          * @param callable $callback Fonction à appeler en cas de détection
          * @return void
          */
-        public static function delete(string $name, string $uri, callable $callback): void
-        {
+        public static function delete(string $name, string $uri, callable $callback): void {
             self::store($name, ['DELETE'], $uri, $callback);
         }
 
@@ -706,8 +709,7 @@ namespace components\core {
          * @param callable $middleware Middleware à ajouter
          * @return void
          */
-        public static function before(?string $routeName, callable|string $middleware): void
-        {
+        public static function before(?string $routeName, callable|string $middleware): void {
             self::add('before', $routeName, $middleware);
         }
 
@@ -716,12 +718,9 @@ namespace components\core {
          * @param callable $middleware Middleware à ajouter
          * @return void
          */
-        public static function after(?string $routeName, callable|string $middleware): void
-        {
+        public static function after(?string $routeName, callable|string $middleware): void {
             self::add('after', $routeName, $middleware);
         }
-
-
     }
 
 }
