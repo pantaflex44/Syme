@@ -25,18 +25,6 @@ declare(strict_types=1);
 
 namespace components\extended {
 
-    ini_set('session.use_cookies', 1);
-    ini_set('session.use_only_cookies', 1);
-    ini_set('session.use_strict_mode', 1);
-    ini_set('session.cookie_httponly', 1);
-    ini_set('session.cookie_secure', 1);
-    ini_set('session.cookie_samesite', 'Strict');
-    ini_set('session.use_trans_id', 0);
-    ini_set('session.cache_limiter', 'nocache');
-    ini_set('session.url_rewriter_tags', 0);
-    ini_set('session.cookie_lifetime', 0);
-    ini_set('session.cookie_path', '/');
-
     use components\core\Route;
 
     class Session {
@@ -45,6 +33,18 @@ namespace components\extended {
          * @return void
          */
         public static function __required(): void {
+            ini_set('session.use_cookies', 1);
+            ini_set('session.use_only_cookies', 1);
+            ini_set('session.use_strict_mode', 1);
+            ini_set('session.cookie_httponly', 1);
+            ini_set('session.cookie_secure', 1);
+            ini_set('session.cookie_samesite', 'Strict');
+            ini_set('session.use_trans_id', 0);
+            ini_set('session.cache_limiter', 'nocache');
+            ini_set('session.url_rewriter_tags', 0);
+            ini_set('session.cookie_lifetime', 0);
+            ini_set('session.cookie_path', '/');
+
             Route::extendWith(Session::class);
         }
 
