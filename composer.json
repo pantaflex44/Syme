@@ -4,7 +4,10 @@
     "type": "project",
     "require": {
         "twig/twig": "^3.0",
-        "ext-fileinfo": "*"
+        "ext-fileinfo": "*",
+        "ext-simplexml": "*",
+        "ext-libxml": "*",
+        "ext-zlib": "*"
     },
     "license": "MIT",
     "authors": [

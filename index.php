@@ -21,25 +21,20 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-
 declare(strict_types=1);
 
-
 require_once './core.php';
-
 
 use components\core\Data;
 use components\core\Request;
 use components\core\Response;
 use components\core\Route;
-use components\extends\MyComponent;
-use components\extends\TwigWrapper;
+use components\extended\TwigWrapper;
 use middlewares\CsrfMiddleware;
-
 
 Route::get('home_get', '/', function (Response $response): Response {
     $response
-        ->write('
+            ->write('
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -63,7 +58,7 @@ Route::get('home_get', '/', function (Response $response): Response {
 Route::post('home_post', '/', function (Request $request, Response $response, Route $route): null|Response {
     if ($route::redirect('home_get') === false) {
         $response
-            ->writeObject($request->getForm());
+                ->writeObject($request->getForm());
 
         return $response;
     }
@@ -73,19 +68,18 @@ Route::post('home_post', '/', function (Request $request, Response $response, Ro
 
 Route::get('bob2', '/bob/{token}', function (string $token, Response $response): Response {
     $response
-        ->writeObject($token)
-        ->withStatus(200);
+            ->writeObject($token)
+            ->withStatus(200);
 
     return $response;
 });
 
-Route::get('bob', '/bob/{id:[0-9]+}/super/{name}', function (int $id, string $name, Response $response, Data $data, MyComponent $mc): Response {
-    $obj = ['id' => $id, 'name' => $name];
-    $obj = array_merge($obj, $data->all());
+Route::get('bob', '/bob/{id:[0-9]+}/super/{name}', function (int $id, string $name, Response $response, Data $data): Response {
+    $obj = array_merge(['id' => $id, 'name' => $name], $data->all());
 
     $response
-        ->writeObject($obj)
-        ->withStatus(200);
+            ->writeObject($obj)
+            ->withStatus(200);
 
     return $response;
 });
@@ -97,17 +91,15 @@ Route::before('bob', function (Request $request, Response $response, Data $data)
 Route::map(['GET', 'POST'], 'form', '/form', function (Request $request, Response $response, TwigWrapper $twig): Response {
     if ($request->getMethod() === 'POST' && $request->hasForm()) {
         $response->writeObject($request->getForm());
-
     } else {
         // modifie automatiquement le contenu de la réponse courante
-        $twig->renderToResponse('form.html', [
+        $twig->createResponse('form.html', [
             'title' => "Syme"
         ]);
     }
 
     return $response;
 });
-
 
 Route::get('home', '/{name}', function (Response $response, Data $data): Response {
     $response->write("je suis le traitement de la route<br />");
@@ -120,6 +112,4 @@ Route::after(null, function (array $attributes, Response $response): void {
     $response->append("je suis le middleware après le traitement de la route<br />");
     $response->append(json_encode($attributes));
 });
-
-
 

@@ -15,7 +15,9 @@
 
 .git
 .idea
+.vscode
 /config.local.php
 /composer.lock
 /vendor
 /templates/cache
+/nbproject/private/

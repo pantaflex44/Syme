@@ -21,40 +21,37 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-
 declare(strict_types=1);
 
 namespace components\core {
 
-    use components\Body;
-
     /**
      * Réponse HTTP
      */
-    class Response
-    {
+    class Response {
 
         protected string $contentType;
-
         protected string $body;
-
         protected array $headers = [];
-
         protected int $status = 200;
 
-        private function filter(array $parsed): array
-        {
+        private function filter(array $parsed): array {
             $filtered = [];
 
             foreach ($parsed as $k => $v) {
                 if (is_string($v)) {
                     $v = trim($v);
 
-                    if (strtolower($v) === 'true') $filtered[$k] = true;
-                    elseif (strtolower($v) === 'false') $filtered[$k] = false;
-                    elseif (is_numeric($v) && is_float($v + 0)) $filtered[$k] = floatval($v);
-                    elseif (is_numeric($v) && ctype_digit(strval($v))) $filtered[$k] = intval($v);
-                    else $filtered[$k] = $v;
+                    if (strtolower($v) === 'true')
+                        $filtered[$k] = true;
+                    elseif (strtolower($v) === 'false')
+                        $filtered[$k] = false;
+                    elseif (is_numeric($v) && is_float($v + 0))
+                        $filtered[$k] = floatval($v);
+                    elseif (is_numeric($v) && ctype_digit(strval($v)))
+                        $filtered[$k] = intval($v);
+                    else
+                        $filtered[$k] = $v;
                 } else {
                     $filtered[$k] = $v;
                 }
@@ -64,10 +61,10 @@ namespace components\core {
         }
 
         /** Constructeur
-         * @param Body $body Contenu de la réponse
+         * @param string $body Contenu de la réponse
+         * @param string $contentType Type du contenu
          */
-        public function __construct(string $body = '', string $contentType = 'text/html')
-        {
+        public function __construct(string $body = '', string $contentType = 'text/html') {
             $this->body = $body;
             $this->contentType = $contentType;
         }
@@ -76,8 +73,7 @@ namespace components\core {
          * @param string $header Nom de l'entète HTTP
          * @return bool true, l'entète est présente, sinon, false
          */
-        public function hasHeader(string $header): bool
-        {
+        public function hasHeader(string $header): bool {
             return array_key_exists($header, $this->headers);
         }
 
@@ -85,10 +81,10 @@ namespace components\core {
          * @param string $headerKey Nom de l'entète
          * @return bool true, l'entète a été supprimée, sinon, false
          */
-        public function removeHeader(string $headerKey): bool
-        {
+        public function removeHeader(string $headerKey): bool {
             $index = array_search(strtolower($headerKey), array_map('strtolower', array_keys($this->headers)));
-            if ($index === false) return false;
+            if ($index === false)
+                return false;
 
             $key = array_keys($this->headers)[$index];
             unset($this->headers[$key]);
@@ -99,8 +95,7 @@ namespace components\core {
         /** Retourne la liste des entètes HTTP
          * @return array Liste des entètes HTTP
          */
-        public function getHeaders(): array
-        {
+        public function getHeaders(): array {
             return $this->headers;
         }
 
@@ -108,8 +103,7 @@ namespace components\core {
          * @param string $header Nom de l'entète HTTP
          * @return false|string Valeur de l'entère, false en cas d'erreur
          */
-        public function getHeader(string $header): false|string
-        {
+        public function getHeader(string $header): false|string {
             return $this->hasHeader($header) ? $this->headers[$header] : false;
         }
 
@@ -117,9 +111,9 @@ namespace components\core {
          * @param string $header Entète HTTP à ajouter
          * @return $this
          */
-        public function withHeader(string $header): Response
-        {
-            if (!$this->hasHeader($header)) $this->headers[] = $header;
+        public function withHeader(string $header): Response {
+            if (!$this->hasHeader($header))
+                $this->headers[] = $header;
             return $this;
         }
 
@@ -127,9 +121,10 @@ namespace components\core {
          * @param string $bearer Jeton JWT
          * @return $this
          */
-        public function withBearerAuthorization(string $bearer): Response
-        {
-            if (preg_match('/Bearer\s(\S+)/is', $bearer, $matches)) $bearer = $matches[1];
+        public function withBearerAuthorization(string $bearer): Response {
+            if (preg_match('/Bearer\s(\S+)/is', $bearer, $matches)) {
+                $bearer = $matches[1];
+            }
             return $this->withHeader("Authorization: Bearer $bearer");
         }
 
@@ -137,17 +132,16 @@ namespace components\core {
          * @param string $header Entètes HTTP à ajouter
          * @return $this
          */
-        public function withHeaders(array $headers): Response
-        {
-            foreach ($headers as $key => $value) $this->withHeader(ucfirst(strtolower($key)) . ": " . $value);
+        public function withHeaders(array $headers): Response {
+            foreach ($headers as $key => $value)
+                $this->withHeader(ucfirst(strtolower($key)) . ": " . $value);
             return $this;
         }
 
         /** Retourne le code HTTP lié à la réponse
          * @return int Code HTTP
          */
-        public function getStatus(): int
-        {
+        public function getStatus(): int {
             return $this->status;
         }
 
@@ -155,22 +149,9 @@ namespace components\core {
          * @param int $status Code HTTP du status de la réponse
          * @return $this
          */
-        public function withStatus(int $status): Response
-        {
+        public function withStatus(int $status): Response {
             if (
-                ($status >= 100 && $status <= 103)
-                || ($status >= 200 && $status <= 208)
-                || $status === 226
-                || ($status >= 300 && $status <= 308)
-                || $status === 310
-                || ($status >= 400 && $status <= 419)
-                || $status === 431
-                || ($status >= 449 && $status <= 451)
-                || $status === 456
-                || $status === 444
-                || ($status >= 495 && $status <= 499)
-                || ($status >= 500 && $status <= 511)
-                || ($status >= 520 && $status <= 527)
+                    ($status >= 100 && $status <= 103) || ($status >= 200 && $status <= 208) || $status === 226 || ($status >= 300 && $status <= 308) || $status === 310 || ($status >= 400 && $status <= 419) || $status === 431 || ($status >= 449 && $status <= 451) || $status === 456 || $status === 444 || ($status >= 495 && $status <= 499) || ($status >= 500 && $status <= 511) || ($status >= 520 && $status <= 527)
             ) {
                 $this->status = $status;
             }
@@ -181,29 +162,25 @@ namespace components\core {
         /**  Renvoie le contenu brut
          * @return string Contenu brut
          */
-        public function getContent(): string
-        {
+        public function getContent(): string {
             return $this->body;
         }
 
-        public function getGzipContent(): string
-        {
+        public function getGzipContent(): string {
             return gzencode(trim(preg_replace('/\s+/', ' ', $this->body)), 9);
         }
 
         /** Retourne le type du contenu
          * @return string Type du contenu
          */
-        public function getContentType(): string
-        {
+        public function getContentType(): string {
             return $this->contentType;
         }
 
         /** Renvoie le contenu découpé et analysé
          * @return array Contenu découpé
          */
-        public function getParsed(): array
-        {
+        public function getParsed(): array {
             try {
                 switch (strtolower(trim(explode(';', $this->contentType)[0]))) {
                     case 'application/x-www-form-urlencoded':
@@ -215,31 +192,36 @@ namespace components\core {
                     case 'application/xml':
                     case 'text/xml':
                         $xml = simplexml_load_string($this->body, 'SimpleXMLElement', LIBXML_NOCDATA | LIBXML_NOBLANKS | LIBXML_NOWARNING);
-                        if ($xml === false) return [];
-                        return @json_decode(@json_encode($xml),true) ?? [];
+                        if ($xml === false)
+                            return [];
+                        return @json_decode(@json_encode($xml), true) ?? [];
                     case 'multipart/form-data':
                         $method = strtoupper(trim($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD'] ?? $_SERVER['REQUEST_METHOD'] ?? ''));
-                        if (!in_array($method, ['PUT', 'DELETE', 'PATCH']) || preg_match('/^multipart\/form-data; boundary=.*$/ui', $this->contentType) !== 1) return [];
+                        if (!in_array($method, ['PUT', 'DELETE', 'PATCH']) || preg_match('/^multipart\/form-data; boundary=.*$/ui', $this->contentType) !== 1)
+                            return [];
 
                         $formData = $this->body;
                         $boundary = preg_replace('/(^multipart\/form-data; boundary=)(.*$)/ui', '$2', $this->contentType);
 
-                        if (preg_match('/^\s*--'.$boundary.'.*\s*--'.$boundary.'--\s*$/muis', $formData) !== 1) return [];
-                        $formData = preg_replace('/(^\s*--'.$boundary.'.*)(\s*--'.$boundary.'--\s*$)/muis', '$1', $formData);
-                        $formData = preg_split('/\s*--'.$boundary.'\s*Content-Disposition: form-data;\s*/muis', $formData, 0, PREG_SPLIT_NO_EMPTY);
+                        if (preg_match('/^\s*--' . $boundary . '.*\s*--' . $boundary . '--\s*$/muis', $formData) !== 1)
+                            return [];
+                        $formData = preg_replace('/(^\s*--' . $boundary . '.*)(\s*--' . $boundary . '--\s*$)/muis', '$1', $formData);
+                        $formData = preg_split('/\s*--' . $boundary . '\s*Content-Disposition: form-data;\s*/muis', $formData, 0, PREG_SPLIT_NO_EMPTY);
 
                         $parsedData = [];
                         foreach ($formData as $field) {
-                            $name =  preg_replace('/(name=")(?<name>[^"]+)("\s*)(?<value>.*$)/mui', '$2', $field);
-                            $value =  preg_replace('/(name=")(?<name>[^"]+)("\s*)(?<value>.*$)/mui', '$4', $field);
+                            $name = preg_replace('/(name=")(?<name>[^"]+)("\s*)(?<value>.*$)/mui', '$2', $field);
+                            $value = preg_replace('/(name=")(?<name>[^"]+)("\s*)(?<value>.*$)/mui', '$4', $field);
 
                             if (str_contains($name, '[')) {
                                 $keys = explode('[', trim($name));
                                 $name = '';
-                                foreach ($keys as $key) $name .= '{"' . rtrim($key, ']') . '":';
+                                foreach ($keys as $key)
+                                    $name .= '{"' . rtrim($key, ']') . '":';
                                 $name .= '"' . trim($value) . '"' . str_repeat('}', count($keys));
                                 $array = json_decode($name, true);
-                                if (!is_null($array)) $parsedData = array_replace_recursive($parsedData, $array);
+                                if (!is_null($array))
+                                    $parsedData = array_replace_recursive($parsedData, $array);
                             } else {
                                 $parsedData[trim($name)] = trim($value);
                             }
@@ -258,8 +240,7 @@ namespace components\core {
          * @param bool $associative true, renvoie un tableau associatif, sinon, false pour renvoyer un objet
          * @return mixed Contenu au format JSON
          */
-        public function getJson(bool $associative = true): mixed
-        {
+        public function getJson(bool $associative = true): mixed {
             try {
                 return json_decode($this->body, $associative);
             } catch (\Exception $ex) {
@@ -270,8 +251,7 @@ namespace components\core {
         /** Vide les données du contenu à renvoyer
          * @return $this
          */
-        public function clear(): Response
-        {
+        public function clear(): Response {
             $this->body = "";
             $this->contentType = 'text/html';
             return $this;
@@ -281,8 +261,7 @@ namespace components\core {
          * @param string $content Content to write
          * @return $this This instance
          */
-        public function write(string $content, string $contentType = 'text/html'): Response
-        {
+        public function write(string $content, string $contentType = 'text/html'): Response {
             $this->body .= $content;
             $this->contentType = $contentType;
             return $this;
@@ -292,8 +271,7 @@ namespace components\core {
          * @param string $content Content à écrire
          * @return $this
          */
-        public function prepend(string $content): Response
-        {
+        public function prepend(string $content): Response {
             $this->body = $content . $this->body;
             return $this;
         }
@@ -302,8 +280,7 @@ namespace components\core {
          * @param string $content Content à écrire
          * @return $this
          */
-        public function append(string $content): Response
-        {
+        public function append(string $content): Response {
             $this->body .= $content;
             return $this;
         }
@@ -312,8 +289,7 @@ namespace components\core {
          * @param mixed $object Objet a convertir
          * @return $this This instance
          */
-        public function writeObject(mixed $object): Response
-        {
+        public function writeObject(mixed $object): Response {
             $this->body = json_encode($object, JSON_PRETTY_PRINT);
             $this->contentType = 'application/json';
             return $this;
@@ -323,18 +299,15 @@ namespace components\core {
          * @param mixed $json Contenu au format JSON à écrire
          * @return $this This instance
          */
-        public function writeJson(string $json): Response
-        {
+        public function writeJson(string $json): Response {
             $this->body = $json;
             $this->contentType = 'application/json';
             return $this;
         }
 
-        public function __toString(): string
-        {
+        public function __toString(): string {
             return $this->body;
         }
-
     }
 
 }

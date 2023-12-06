@@ -21,10 +21,9 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-
 declare(strict_types=1);
 
-namespace components\extends {
+namespace components\extended {
 
     use components\core\Response;
     use components\core\Route;
@@ -34,16 +33,19 @@ namespace components\extends {
     use Twig\TwigFilter;
     use Twig\TwigFunction;
 
-    Route::extendWith(TwigWrapper::class);
-
-    class TwigWrapper
-    {
+    class TwigWrapper {
 
         private Environment $twig;
         private Response $response;
-
         protected static array $filters = [];
         protected static array $functions = [];
+
+        /** Se produit lorsque le composant est chargé
+         * @return void
+         */
+        public static function __required(): void {
+            Route::extendWith(TwigWrapper::class);
+        }
 
         /** Ajoute un filtre Twig
          * @param string $name Nom du filtre
@@ -51,8 +53,7 @@ namespace components\extends {
          * @param array $options Tableau d'options complémentaires
          * @return void
          */
-        public static function addFilter(string $name, callable $callback, array $options = []): void
-        {
+        public static function addFilter(string $name, callable $callback, array $options = []): void {
             $filter = new TwigFilter($name, $callback, $options);
             self::$filters[] = $filter;
         }
@@ -63,8 +64,7 @@ namespace components\extends {
          * @param array $options Tableau d'options complémentaires
          * @return void
          */
-        public static function addFunction(string $name, callable $callback, array $options = []): void
-        {
+        public static function addFunction(string $name, callable $callback, array $options = []): void {
             $function = new TwigFunction($name, $callback, $options);
             self::$functions[] = $function;
         }
@@ -73,8 +73,7 @@ namespace components\extends {
          * @param Response $response
          * @throws \Exception
          */
-        public function __construct(Response $response)
-        {
+        public function __construct(Response $response) {
             if (!InstalledVersions::isInstalled('twig/twig')) {
                 throw new \Exception("Twig package not loaded. Please run 'composer install' before use your application.");
             } else {
@@ -85,14 +84,26 @@ namespace components\extends {
             }
 
             $templatePath = defined('TWIG_TEMPLATE_PATH') ? constant('TWIG_TEMPLATE_PATH') : __DIR__ . '/../../templates';
-            if (!is_dir($templatePath)) mkdir($templatePath, 0744);
-            if (!is_readable($templatePath)) throw new \Exception("No readable template path.");
-            if (!is_writable($templatePath)) throw new \Exception("No writable template path.");
+            if (!is_dir($templatePath)) {
+                mkdir($templatePath, 0744);
+            }
+            if (!is_readable($templatePath)) {
+                throw new \Exception("No readable template path.");
+            }
+            if (!is_writable($templatePath)) {
+                throw new \Exception("No writable template path.");
+            }
 
             $cachePath = defined('TWIG_CACHE_PATH') ? constant('TWIG_CACHE_PATH') : $templatePath . '/cache';
-            if (!is_dir($cachePath)) mkdir($cachePath, 0744);
-            if (!is_readable($cachePath)) throw new \Exception("No readable cache path.");
-            if (!is_writable($cachePath)) throw new \Exception("No writable cache path.");
+            if (!is_dir($cachePath)) {
+                mkdir($cachePath, 0744);
+            }
+            if (!is_readable($cachePath)) {
+                throw new \Exception("No readable cache path.");
+            }
+            if (!is_writable($cachePath)) {
+                throw new \Exception("No writable cache path.");
+            }
 
             $loader = new FilesystemLoader($templatePath);
             $this->twig = new Environment($loader, [
@@ -101,8 +112,12 @@ namespace components\extends {
                 'charset' => 'utf-8'
             ]);
 
-            foreach (TwigWrapper::$filters as $filter) $this->twig->addFilter($filter);
-            foreach (TwigWrapper::$functions as $function) $this->twig->addFunction($function);
+            foreach (TwigWrapper::$filters as $filter) {
+                $this->twig->addFilter($filter);
+            }
+            foreach (TwigWrapper::$functions as $function) {
+                $this->twig->addFunction($function);
+            }
 
             $this->response = $response;
         }
@@ -115,16 +130,19 @@ namespace components\extends {
          * @throws \Twig\Error\RuntimeError
          * @throws \Twig\Error\SyntaxError
          */
-        public function renderToResponse(string $templateName, array $data = []): Response
-        {
+        public function createResponse(string $templateName, array $data = [], bool $toCurrentResponse = true): Response {
             $content = $this->twig->render($templateName, $data);
-            $this->response
-                ->clear()
-                ->write($content);
 
-            return $this->response;
+            if ($toCurrentResponse) {
+                $this->response
+                        ->clear()
+                        ->write($content);
+
+                return $this->response;
+            } else {
+                return new Response($content, 'text/html');
+            }
         }
-
     }
 
 }
