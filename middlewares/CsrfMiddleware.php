@@ -21,6 +21,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
+declare(strict_types=1);
 
 namespace middlewares {
 
@@ -31,8 +32,7 @@ namespace middlewares {
     /**
      * Interface d'un middleware
      */
-    class CsrfMiddleware
-    {
+    class CsrfMiddleware {
 
         /** Fonction exécutée lors de l'utilisation d'un middleware
          * @param Request $request Dernière requète
@@ -40,13 +40,9 @@ namespace middlewares {
          * @param Data $data Données personnelles
          * @return void
          */
-        public function __invoke(array $attributes, Request $request, Response $response, Data $data): void
-        {
-            $data->set('bob', 'est cool');
-            $data->set('crsf middleware', $attributes);
-            $response->withHeader('X-bob: cool');
-        }
+        public function __invoke(array $attributes, Request $request, Response $response, Data $data): void {
 
+        }
     }
 
 }

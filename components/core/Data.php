@@ -21,7 +21,6 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-
 declare(strict_types=1);
 
 namespace components\core {
@@ -29,90 +28,78 @@ namespace components\core {
     /**
      * Liste des données personnelles liées aux routes
      */
-    class Data
-    {
+    class Data {
 
         protected array $data = [];
 
         /**
          * Constructeur
          */
-        public function __construct()
-        {
+        public function __construct() {
             $this->data = [];
         }
 
         /** Retourne le nombre de données enregistrées
          * @return int Nombre de données enregistrées
          */
-        public function count(): int
-        {
+        public function count(): int {
             return count($this->data);
-        }
-
-        /** Ajoute une donnée personnelle
-         * @param string $key Nom de la donnée
-         * @param mixed $value Valeur de la donnée
-         * @return void
-         */
-        public function set(string $key, mixed $value): void
-        {
-            $this->data[$key] = $value;
-        }
-
-        /** Récupère la valeur d'une donnée par son nom
-         * @param string $key Nom de la donnée
-         * @return mixed Valeur de la donnée, null, si elle n'éxiste pas
-         */
-        public function get(string $key): mixed
-        {
-            return $this->data[$key] ?? null;
-        }
-
-        /** Indique si une donnée existe par son nom
-         * @param string $key Nom de la donnée
-         * @return bool true, la donnée existe, sinon, false
-         */
-        public function exists(string $key): bool
-        {
-            return isset($this->data[$key]);
-        }
-
-        /** Supprime une donnée par son nom
-         * @param string $key Nom de la donnée
-         * @return bool true, la donnée est bien supprimée, sinon, false
-         */
-        public function delete(string $key): bool
-        {
-            if ($this->exists($key)) {
-                unset($this->data[$key]);
-                return true;
-            }
-
-            return false;
         }
 
         /** Supprime toutes les données
          * @return void
          */
-        public function clear(): void
-        {
+        public function clear(): void {
             $this->data = [];
         }
 
         /** Retourne la liste complète des données
          * @return array Liste des données
          */
-        public function all(): array
-        {
+        public function all(): array {
             return $this->data;
         }
 
-        public function __toString(): string
-        {
-            return json_encode(ksort($this->data), JSON_PRETTY_PRINT);
+        /** Vérifie si un paramètre existe
+         * @param string $key Nom du paramètre
+         * @return bool
+         */
+        public function __isset(string $key): bool {
+            return isset($this->data[$key]);
         }
 
+        /** Retourne la valeur d'un paramètre
+         * @param string $key Nom du paramètre
+         * @return mixed
+         */
+        public function __get(string $key): mixed {
+            if (!isset($this->data[$key]))
+                return null;
+
+            return $this->data[$key];
+        }
+
+        /** Définit la valeur d'un paramètre
+         * @param string $key Nom du paramètre
+         * @param mixed $value Valeur du paramètre
+         * @return void
+         */
+        public function __set(string $key, mixed $value): void {
+            $this->data[$key] = $value;
+        }
+
+        /** Détruit un paramètre
+         * @param string $key Nom du paramètre
+         * @return void
+         */
+        public function __unset(string $key): void {
+            if (isset($this->data[$key]))
+                unset($this->data[$key]);
+        }
+
+        public function __toString(): string {
+            return json_encode(ksort($this->data), JSON_PRETTY_PRINT);
+        }
     }
 
 }

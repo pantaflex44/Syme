@@ -72,7 +72,7 @@ Route::get('bob', '/bob/{id:[0-9]+}/super/{name}', function (int $id, string $na
 });
 Route::before('bob', CsrfMiddleware::class);
 Route::before('bob', function (Request $request, Response $response, Data $data): void {
-    $data->set('valeur de la donnee bob', $data->get('bob'));
+    $data->bob_value = $data->bob;
 });
 
 Route::map(['GET', 'POST'], 'form', '/form', function (Request $request, Response $response, TwigWrapper $twig): Response {
