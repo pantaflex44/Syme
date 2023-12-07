@@ -131,10 +131,22 @@ namespace components\core {
 
             if ($routeName !== '_' && !self::exists($routeName))
                 return;
+
             if (!isset(self::$middlewares[$order][$routeName]))
                 self::$middlewares[$order][$routeName] = [];
 
             self::$middlewares[$order][$routeName][] = $middleware;
+
+            try {
+                $class = new \ReflectionClass($middleware);
+                if ($class->hasMethod('__added')) {
+                    $method = $class->getMethod('__added');
+                    $params = self::paramsInjection($method);
+                    $method->invokeArgs(null, $params);
+                }
+            } catch (\Exception $ex) {
+
+            }
         }
 
         /** Applique les middlewares

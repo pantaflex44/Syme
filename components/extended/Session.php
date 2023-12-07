@@ -98,7 +98,7 @@ namespace components\extended {
          * @param string $name Nom du paramètre
          * @return bool
          */
-        public function __isset(string $name): bool {
+        public function exists(string $name): bool {
             return isset($_SESSION[$name]);
         }
 
@@ -106,7 +106,7 @@ namespace components\extended {
          * @param string $name Nom du paramètre
          * @return mixed
          */
-        public function __get(string $name): mixed {
+        public function get(string $name): mixed {
             if (!isset($_SESSION[$name]))
                 return null;
 
@@ -118,7 +118,7 @@ namespace components\extended {
          * @param mixed $value Valeur du paramètre
          * @return void
          */
-        public function __set(string $name, mixed $value): void {
+        public function set(string $name, mixed $value): void {
             $_SESSION[$name] = $value;
         }
 
@@ -126,7 +126,7 @@ namespace components\extended {
          * @param string $name Nom du paramètre
          * @return void
          */
-        public function __unset(string $name): void {
+        public function delete(string $name): void {
             if (isset($_SESSION[$name]))
                 unset($_SESSION[$name]);
         }

@@ -70,7 +70,7 @@ Route::get('bob', '/bob/{id:[0-9]+}/super/{name}', function (int $id, string $na
 
     return $response;
 });
-Route::before('bob', CsrfMiddleware::class);
+
 Route::before('bob', function (Request $request, Response $response, Data $data): void {
     $data->bob_value = $data->bob;
 });
@@ -87,6 +87,7 @@ Route::map(['GET', 'POST'], 'form', '/form', function (Request $request, Respons
 
     return $response;
 });
+Route::before('form', CsrfMiddleware::class);
 
 Route::get('home', '/{name}', function (string $name, Response $response, Data $data, Session $session): Response {
     $response->writeObject([

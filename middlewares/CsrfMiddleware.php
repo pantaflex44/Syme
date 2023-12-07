@@ -28,11 +28,36 @@ namespace middlewares {
     use components\core\Data;
     use components\core\Request;
     use components\core\Response;
+    use components\extended\Session;
+    use components\extended\TwigWrapper;
 
     /**
      * Interface d'un middleware
      */
     class CsrfMiddleware {
+
+        /** Génère un nouveau token
+         * @param int $length Taille par défaut du token (32 caractères)
+         * @return string Nouveau token
+         */
+        private static function createToken(int $length = 32): string {
+            return bin2hex(random_bytes($length));
+        }
+
+        /** Se produit lorque le middleware est ajouté à une route
+         * @param Session $session
+         * @return void
+         */
+        public static function __added(Session $session): void {
+            TwigWrapper::addFunction('csrf', function (string $prefix = '') use ($session): string {
+                $name = uniqid($prefix);
+                $token = self::createToken();
+                $session->set('csrf_token', ['name' => $name, 'token' => $token]);
+
+                $html = '<input type="hidden" name="csrf_name" value="' . $name . '" /><input type="hidden" name="csrf_token" value="' . $token . '" />';
+                return $html;
+            });
+        }
 
         /** Fonction exécutée lors de l'utilisation d'un middleware
          * @param Request $request Dernière requète
@@ -40,8 +65,29 @@ namespace middlewares {
          * @param Data $data Données personnelles
          * @return void
          */
-        public function __invoke(array $attributes, Request $request, Response $response, Data $data): void {
+        public function __invoke(Request $request, Session $session): void {
+            if ($request->hasForm()) {
+                $form = $request->getForm();
 
+                if (!isset($form->csrf_name) || !isset($form->csrf_token) || !$session->exists('csrf_token')) {
+                    header('HTTP/1.0 403 Forbidden');
+                    exit;
+                }
+
+                $csrf = $session->get('csrf_token');
+
+                if (!isset($csrf['name']) || $csrf['name'] !== $form->csrf_name) {
+                    header('HTTP/1.0 401 Unauthorized');
+                    exit;
+                }
+
+                if (!isset($csrf['token']) || $csrf['token'] !== $form->csrf_token) {
+                    header('HTTP/1.0 401 Unauthorized');
+                    exit;
+                }
+            }
+
+            $session->delete('csrf_token');
         }
     }
 
