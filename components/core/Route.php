@@ -43,6 +43,10 @@ namespace components\core {
          * @var array $components Liste des composants personnalisés accessibles dans les callbacks et middlewares
          */
         protected static array $components = [];
+        protected static ?Data $data = null;
+        protected static ?Response $response = null;
+        protected static ?Request $request = null;
+        protected static ?Route $route = null;
 
         /** Enregistre une nouvelle règle
          * @param string $name Nom de la route
@@ -158,28 +162,22 @@ namespace components\core {
          * @return void
          * @throws \ReflectionException
          */
-        private static function applyMiddleware(string $order, string $routeName, Request &$request, Response &$response, Data &$data, array $namedParameters = []): void {
+        private static function applyMiddleware(string $order, string $routeName, array $namedParameters = []): void {
             $middlewares = array_merge(
                     self::$middlewares[$order][$routeName] ?? [],
                     self::$middlewares[$order]['_'] ?? []
             );
 
             foreach ($middlewares as $middleware) {
-                $injectables = [
-                    Route::class => new self(),
-                    Request::class => $request,
-                    Response::class => $response,
-                    Data::class => $data
-                ];
                 if (is_callable($middleware)) {
                     $method = new \ReflectionFunction($middleware);
-                    $params = self::paramsInjection($method, $injectables, $namedParameters);
+                    $params = self::paramsInjection($method, nameDependencies: $namedParameters);
                     $method->invokeArgs($params);
                 } elseif (gettype($middleware) === 'string') {
                     $class = new \ReflectionClass($middleware);
                     if ($class->hasMethod('__invoke')) {
                         $method = $class->getMethod('__invoke');
-                        $params = self::paramsInjection($method, $injectables, $namedParameters);
+                        $params = self::paramsInjection($method, nameDependencies: $namedParameters);
                         $method->invokeArgs(new $middleware, $params);
                     }
                 }
@@ -193,8 +191,8 @@ namespace components\core {
          * @param Data $data Données personnelles
          * @return void
          */
-        private static function applyBeforeMiddleware(string $routeName, Request &$request, Response &$response, Data &$data, array $namedParameters = []): void {
-            self::applyMiddleware('before', $routeName, $request, $response, $data, $namedParameters);
+        private static function applyBeforeMiddleware(string $routeName, array $namedParameters = []): void {
+            self::applyMiddleware('before', $routeName, $namedParameters);
         }
 
         /** Applique les middlewares éxécutée après une route
@@ -205,8 +203,8 @@ namespace components\core {
          * @return void
          * @throws \ReflectionException
          */
-        private static function applyAfterMiddleware(string $routeName, Request &$request, Response &$response, Data &$data, array $namedParameters = []): void {
-            self::applyMiddleware('after', $routeName, $request, $response, $data, $namedParameters);
+        private static function applyAfterMiddleware(string $routeName, array $namedParameters = []): void {
+            self::applyMiddleware('after', $routeName, $namedParameters);
         }
 
         /** Permet l'injection de paramètres
@@ -220,6 +218,22 @@ namespace components\core {
             if (is_null($method))
                 return [];
 
+            if (is_null(self::$route))
+                self::$route = new self();
+            if (is_null(self::$data))
+                self::$data = new Data();
+            if (is_null(self::$response))
+                self::$response = new Response();
+            if (is_null(self::$request))
+                self::$request = Request::current();
+
+            $fullTypeDependencies = array_merge($typeDependencies, [
+                Route::class => self::$route,
+                Data::class => self::$data,
+                Response::class => self::$response,
+                Request::class => self::$request
+            ]);
+
             $components = array_keys(self::$components);
             $params = [];
             $hasAttributesParameter = false;
@@ -229,8 +243,8 @@ namespace components\core {
 
                 if ($hasAttributesParameter === false && $name === 'attributes' && $type === 'array') {
                     $hasAttributesParameter = true;
-                } elseif (isset($typeDependencies[$type])) {
-                    $params[$name] = $typeDependencies[$type];
+                } elseif (isset($fullTypeDependencies[$type])) {
+                    $params[$name] = $fullTypeDependencies[$type];
                 } elseif (in_array($type, $components)) {
                     if (is_null(self::$components[$type])) {
                         $class = new \ReflectionClass($type);
@@ -505,14 +519,13 @@ namespace components\core {
             $found = false;
             $called = false;
 
-            $data = new Data();
-            $response = new Response();
+            self::$request = $request;
 
             foreach (self::$routes as $name => $details) {
-                if (!in_array($request->getMethod(), $details['methods']))
+                if (!in_array(self::$request->getMethod(), $details['methods']))
                     continue;
 
-                if (preg_match($details['route'], $request->getUri(), $matches, PREG_UNMATCHED_AS_NULL)) {
+                if (preg_match($details['route'], self::$request->getUri(), $matches, PREG_UNMATCHED_AS_NULL)) {
                     $found = true;
 
                     if (is_callable($details['callback'])) {
@@ -524,18 +537,13 @@ namespace components\core {
                             }
                         }
 
-                        self::applyBeforeMiddleware($name, $request, $response, $data, $callbackParams);
+                        self::applyBeforeMiddleware($name, $callbackParams);
 
                         $func = new \ReflectionFunction($details['callback']);
-                        $params = self::paramsInjection($func, [
-                                    Route::class => new self(),
-                                    Request::class => $request,
-                                    Response::class => $response,
-                                    Data::class => $data
-                                        ], $callbackParams);
-                        $response = $func->invokeArgs($params);
+                        $params = self::paramsInjection($func, nameDependencies: $callbackParams);
+                        self::$response = $func->invokeArgs($params);
 
-                        self::applyAfterMiddleware($name, $request, $response, $data, $callbackParams);
+                        self::applyAfterMiddleware($name, $callbackParams);
 
                         $called = true;
                     }
@@ -550,12 +558,12 @@ namespace components\core {
             } elseif (!$called) {
                 header('HTTP/1.1 501 Not Implemented');
                 exit();
-            } elseif (is_null($response)) {
+            } elseif (is_null(self::$response)) {
                 header('HTTP/1.1 400 Bad Request');
                 exit();
             }
 
-            return [$request, $response];
+            return [self::$request, self::$response];
         }
 
         /** Envoie le contenu d'une réponse

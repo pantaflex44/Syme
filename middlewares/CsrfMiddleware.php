@@ -32,7 +32,11 @@ namespace middlewares {
     use components\extended\TwigWrapper;
 
     /**
-     * Interface d'un middleware
+     * Gestion des attaques CSRF
+     *
+     * Requiert:
+     *  Composant: 'components\extended\Session'
+     *  Composant: 'components\core\Request'
      */
     class CsrfMiddleware {
 
