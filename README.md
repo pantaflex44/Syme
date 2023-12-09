@@ -60,14 +60,16 @@ Route::before('article', function(Request $request, Response $response, Data $da
 ```
 
 
-## Composants disponibles
+## Les extensions facultatives:
+
+### Composants disponibles (/components/extended)
 
 - **Session** : Gestionnaire de sessions paramètrable.
 - **MySQL** : Gestionnaire de données MySQL utilisant PDO.
 - **TwigWrapper** : Permet l'utilisation de ```Twig``` via Syme. Requiert ```twig/twig:^3.0``` via Composer.
 
 
-## Middlewares disponibles
+### Middlewares disponibles (/middlewares)
 
 - **CsrfMiddleware** : Permet d'ajouter une protection contre les attaques CSRF aux formulaires HTML.
 
