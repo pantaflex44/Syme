@@ -43,9 +43,25 @@ namespace components\core {
          * @var array $components Liste des composants personnalisés accessibles dans les callbacks et middlewares
          */
         protected static array $components = [];
+
+        /**
+         * @var Data|null $data Gestion des données personnelles
+         */
         protected static ?Data $data = null;
+
+        /**
+         * @var Response|null $response Réponse par défaut
+         */
         protected static ?Response $response = null;
+
+        /**
+         * @var Request|null $request Request traitée
+         */
         protected static ?Request $request = null;
+
+        /**
+         * @var Route|null $route Objet de routage courant
+         */
         protected static ?Route $route = null;
 
         /** Enregistre une nouvelle règle

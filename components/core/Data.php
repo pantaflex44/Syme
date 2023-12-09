@@ -64,7 +64,7 @@ namespace components\core {
          * @param string $key Nom du paramètre
          * @return bool
          */
-        public function __isset(string $key): bool {
+        public function exists(string $key): bool {
             return isset($this->data[$key]);
         }
 
@@ -72,7 +72,7 @@ namespace components\core {
          * @param string $key Nom du paramètre
          * @return mixed
          */
-        public function __get(string $key): mixed {
+        public function get(string $key): mixed {
             if (!isset($this->data[$key]))
                 return null;
 
@@ -84,7 +84,7 @@ namespace components\core {
          * @param mixed $value Valeur du paramètre
          * @return void
          */
-        public function __set(string $key, mixed $value): void {
+        public function set(string $key, mixed $value): void {
             $this->data[$key] = $value;
         }
 
@@ -92,7 +92,7 @@ namespace components\core {
          * @param string $key Nom du paramètre
          * @return void
          */
-        public function __unset(string $key): void {
+        public function delete(string $key): void {
             if (isset($this->data[$key]))
                 unset($this->data[$key]);
         }

@@ -187,14 +187,14 @@ namespace components\core {
                         parse_str($this->body, $parsed);
                         return $this->filter($parsed);
                     case 'application/json':
-                        $parsed = @json_decode($this->body, true) ?? [];
+                        $parsed = json_decode($this->body, true) ?? [];
                         return $this->filter($parsed);
                     case 'application/xml':
                     case 'text/xml':
                         $xml = simplexml_load_string($this->body, 'SimpleXMLElement', LIBXML_NOCDATA | LIBXML_NOBLANKS | LIBXML_NOWARNING);
                         if ($xml === false)
                             return [];
-                        return @json_decode(@json_encode($xml), true) ?? [];
+                        return json_decode(json_encode($xml), true) ?? [];
                     case 'multipart/form-data':
                         $method = strtoupper(trim($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD'] ?? $_SERVER['REQUEST_METHOD'] ?? ''));
                         if (!in_array($method, ['PUT', 'DELETE', 'PATCH']) || preg_match('/^multipart\/form-data; boundary=.*$/ui', $this->contentType) !== 1)

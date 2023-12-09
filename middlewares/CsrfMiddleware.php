@@ -40,22 +40,14 @@ namespace middlewares {
      */
     class CsrfMiddleware {
 
-        /** Génère un nouveau token
-         * @param int $length Taille par défaut du token (32 caractères)
-         * @return string Nouveau token
-         */
-        private static function createToken(int $length = 32): string {
-            return bin2hex(random_bytes($length));
-        }
-
         /** Se produit lorque le middleware est ajouté à une route
          * @param Session $session
          * @return void
          */
         public static function __added(Session $session): void {
-            TwigWrapper::addFunction('csrf', function (string $prefix = '') use ($session): string {
+            TwigWrapper::addFunction('csrf', function (string $prefix = '', int $length = 32) use ($session): string {
                 $name = uniqid($prefix);
-                $token = self::createToken();
+                $token = bin2hex(random_bytes($length));
                 $session->set('csrf_token', ['name' => $name, 'token' => $token]);
 
                 $html = '<input type="hidden" name="csrf_name" value="' . $name . '" /><input type="hidden" name="csrf_token" value="' . $token . '" />';

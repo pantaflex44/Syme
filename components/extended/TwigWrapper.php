@@ -33,6 +33,12 @@ namespace components\extended {
     use Twig\TwigFilter;
     use Twig\TwigFunction;
 
+    /**
+     * Permet l'utilisation de la librairie Twig avec Syme.
+     *
+     * Requiert:
+     *  Composer: twig/twig:^3.0
+     */
     class TwigWrapper {
 
         private Environment $twig;

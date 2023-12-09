@@ -27,23 +27,43 @@ namespace components\extended {
 
     use components\core\Route;
 
+    /**
+     * Gestionnaire de Sessions
+     *
+     * Requiert:
+     *  Configuration: SESSION_USE_COOKIES (facultatif)
+     *  Configuration: SESSION_USE_ONLY_COOKIES (facultatif)
+     *  Configuration: SESSION_USE_STRICT_MODE (facultatif)
+     *  Configuration: SESSION_COOKIE_HTTPONLY (facultatif)
+     *  Configuration: SESSION_COOKIE_SECURE (facultatif)
+     *  Configuration: SESSION_COOKIE_SAMESITE (facultatif)
+     *  Configuration: SESSION_USE_TRANS_ID (facultatif)
+     *  Configuration: SESSION_CACHE_LIMITER (facultatif)
+     *  Configuration: SESSION_URL_REWRITER_TAGS (facultatif)
+     *  Configuration: SESSION_LIFETIME (facultatif)
+     *  Configuration: SESSION_COOKIE_PATH (facultatif)
+     *
+     */
     class Session {
 
         /** Se produit lorsque le composant est chargé
          * @return void
          */
         public static function __required(): void {
-            ini_set('session.use_cookies', 1);
-            ini_set('session.use_only_cookies', 1);
-            ini_set('session.use_strict_mode', 1);
-            ini_set('session.cookie_httponly', 1);
-            ini_set('session.cookie_secure', 1);
-            ini_set('session.cookie_samesite', 'Strict');
-            ini_set('session.use_trans_id', 0);
-            ini_set('session.cache_limiter', 'nocache');
-            ini_set('session.url_rewriter_tags', 0);
-            ini_set('session.cookie_lifetime', 0);
-            ini_set('session.cookie_path', '/');
+            if (!defined('ROOT_PATH'))
+                throw new \Exception("ROOT_PATH parameter not defined in config file.");
+
+            ini_set('session.use_cookies', defined('SESSION_USE_COOKIES') ? SESSION_USE_COOKIES : 1);
+            ini_set('session.use_only_cookies', defined('SESSION_USE_ONLY_COOKIES') ? SESSION_USE_ONLY_COOKIES : 1);
+            ini_set('session.use_strict_mode', defined('SESSION_USE_STRICT_MODE') ? SESSION_USE_STRICT_MODE : 1);
+            ini_set('session.cookie_httponly', defined('SESSION_COOKIE_HTTPONLY') ? SESSION_COOKIE_HTTPONLY : 1);
+            ini_set('session.cookie_secure', defined('SESSION_COOKIE_SECURE') ? SESSION_COOKIE_SECURE : 1);
+            ini_set('session.cookie_samesite', defined('SESSION_COOKIE_SAMESITE') ? SESSION_COOKIE_SAMESITE : 'Strict');
+            ini_set('session.use_trans_id', defined('SESSION_USE_TRANS_ID') ? SESSION_USE_TRANS_ID : 0);
+            ini_set('session.cache_limiter', defined('SESSION_CACHE_LIMITER') ? SESSION_CACHE_LIMITER : 'nocache');
+            ini_set('session.url_rewriter_tags', defined('SESSION_URL_REWRITER_TAGS') ? SESSION_URL_REWRITER_TAGS : 0);
+            ini_set('session.cookie_lifetime', defined('SESSION_LIFETIME') ? SESSION_LIFETIME : 0);
+            ini_set('session.cookie_path', defined('SESSION_COOKIE_PATH') ? SESSION_COOKIE_PATH : ROOT_PATH);
 
             Route::extendWith(Session::class);
         }
