@@ -125,7 +125,7 @@ namespace components\extended {
          * @param mixed $value Valeur à assainir
          * @return string
          */
-        public static function quote(mixed $value): string {
+        public function quote(mixed $value): string {
             return $this->instance->quote(strval($value));
         }
 
@@ -134,7 +134,7 @@ namespace components\extended {
          * @param array|null $args Tableau d'arguments de la requète
          * @return int Nombre d'enregistrements concernées par les changements
          */
-        public static function execute(string $sql, ?array $args = null): int {
+        public function execute(string $sql, ?array $args = null): int {
             try {
                 $stmt = $this->instance->prepare($sql);
                 $stmt->execute($args);
@@ -150,7 +150,7 @@ namespace components\extended {
          * @param array|null $args Tableau d'arguments de la requète
          * @return int Quantité retournée
          */
-        public static function count(string $sql, ?array $args = null): int {
+        public function count(string $sql, ?array $args = null): int {
             try {
                 $stmt = $this->instance->prepare($sql);
                 $stmt->execute($args);
@@ -166,7 +166,7 @@ namespace components\extended {
          * @param array|null $args Tableau d'arguments de la requète
          * @return array|bool false, en cas d'erreur ou si aucun ou plusieurs enregistrements ont été trouvés, sinon, retourne le premier enregistrement trouvé
          */
-        public static function unique(string $sql, ?array $args = null): array|bool {
+        public function unique(string $sql, ?array $args = null): array|bool {
             try {
                 $stmt = $this->instance->prepare($sql);
                 $stmt->execute($args);
@@ -186,7 +186,7 @@ namespace components\extended {
          * @param array|null $args Tableau d'arguments de la requète
          * @return array|bool false, en cas d'erreur ou si aucun enregistrement n'a été trouvé, sinon, retourne le premier enregistrement trouvé
          */
-        public static function first(string $sql, ?array $args = null): array|bool {
+        public function first(string $sql, ?array $args = null): array|bool {
             try {
                 $stmt = $this->instance->prepare($sql);
                 $stmt->execute($args);
@@ -206,7 +206,7 @@ namespace components\extended {
          * @param array|null $args Tableau d'arguments de la requète
          * @return array Tous les enregistrements trouvés
          */
-        public static function all(string $sql, ?array $args = null): array {
+        public function all(string $sql, ?array $args = null): array {
             try {
                 $stmt = $this->instance->prepare($sql);
                 $stmt->execute($args);
