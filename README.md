@@ -59,6 +59,20 @@ Route::before('article', function(Request $request, Response $response, Data $da
 });
 ```
 
+
+## Composants disponibles
+
+- **Session** : Gestionnaire de sessions paramètrable.
+- **MySQL** : Gestionnaire de données MySQL utilisant PDO.
+- **TwigWrapper** : Permet l'utilisation de ```Twig``` via Syme. Requiert ```twig/twig:^3.0``` via Composer.
+
+
+## Middlewares disponibles
+
+- **CsrfMiddleware** : Permet d'ajouter une protection contre les attaques CSRF aux formulaires HTML.
+
+
+
 <br /><br />
 <div style="text-align: center;">
 
