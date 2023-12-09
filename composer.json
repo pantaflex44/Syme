@@ -1,19 +1,45 @@
 {
     "name": "pantaflex44/syme",
     "description": "Syme est un petit framework PHP aidant à la réalisation d'applications Web. Simple et rapide, ce framework a été conçu pour accélérer le développement tout en restant modulaire et efficace. Applications Web, API Rest, Syme est l'outil incontournable de vos projets.",
+    "version": "1.0.0-dev",
     "type": "project",
+    "homepage": "https://github.com/pantaflex44/Syme",
+    "readme": "./README.md",
+    "time": "2024-01-01",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Christophe LEMOINE",
+            "email": "pantaflex@tuta.io",
+            "homepage": "https://github.com/pantaflex44",
+            "role": "Developer"
+        }
+    ],
+    "support": {
+        "email": "pantaflex@tuta.io",
+        "issues": "https://github.com/pantaflex44/Syme/issues"
+    },
+    "autoload": {
+        "psr-4": {
+            "components\\core\\": "components/core/",
+            "components\\extended\\": "components/extended/",
+            "controllers\\": "controllers/",
+            "middlewares\\": "middlewares/",
+            "": "./"
+        }
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/pantaflex44/Syme"
+        }
+    ],
     "require": {
+        "php": ">=8.2",
         "twig/twig": "^3.0",
         "ext-fileinfo": "*",
         "ext-simplexml": "*",
         "ext-libxml": "*",
         "ext-zlib": "*"
-    },
-    "license": "MIT",
-    "authors": [
-        {
-            "name": "Christophe LEMOINE",
-            "email": "pantaflex@tuta.io"
-        }
-    ]
+    }
 }
