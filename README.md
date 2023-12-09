@@ -65,13 +65,72 @@ Route::before('article', function(Request $request, Response $response, Data $da
 ### Composants disponibles (/components/extended)
 
 - **Session** : Gestionnaire de sessions paramètrable.
+
+    Sources: https://github.com/pantaflex44/Syme/blob/v1/components/extended/Session.php
+
+    
+    Requiert:
+
+        - Composant: 'components\core\Route'
+
+        - Configuration: SESSION_USE_COOKIES (facultatif)
+        - Configuration: SESSION_USE_ONLY_COOKIES (facultatif)
+        - Configuration: SESSION_USE_STRICT_MODE (facultatif)
+        - Configuration: SESSION_COOKIE_HTTPONLY (facultatif)
+        - Configuration: SESSION_COOKIE_SECURE (facultatif)
+        - Configuration: SESSION_COOKIE_SAMESITE (facultatif)
+        - Configuration: SESSION_USE_TRANS_ID (facultatif)
+        - Configuration: SESSION_CACHE_LIMITER (facultatif)
+        - Configuration: SESSION_URL_REWRITER_TAGS (facultatif)
+        - Configuration: SESSION_LIFETIME (facultatif)
+        - Configuration: SESSION_COOKIE_PATH (facultatif)
+        
+
+
 - **MySQL** : Gestionnaire de données MySQL utilisant PDO.
+
+    Sources: https://github.com/pantaflex44/Syme/blob/v1/components/extended/MySQL.php
+
+    
+    Requiert:
+
+        - Composant: 'components\core\Route'
+
+        - Configuration: MYSQL_HOST (impératif)
+        - Configuration: MYSQL_PORT (impératif)
+        - Configuration: MYSQL_DATABASE (impératif)
+        - Configuration: MYSQL_USERNAME (impératif)
+        - Configuration: MYSQL_PASSWORD (impératif)
+        
+
+
 - **TwigWrapper** : Permet l'utilisation de ```Twig``` via Syme. Requiert ```twig/twig:^3.0``` via Composer.
+
+    Sources: https://github.com/pantaflex44/Syme/blob/v1/components/extended/TwigWrapper.php
+
+    
+    Requiert:
+
+        - Composer: twig/twig:^3.0
+
+        - Composant: 'components\core\Response'
+        - Composant: 'components\core\Route'
+        
 
 
 ### Middlewares disponibles (/middlewares)
 
 - **CsrfMiddleware** : Permet d'ajouter une protection contre les attaques CSRF aux formulaires HTML.
+
+    Sources: https://github.com/pantaflex44/Syme/blob/v1/middlewares/CsrfMiddleware.php
+
+    
+    Requiert:
+
+        - Composant: 'components\core\Request'
+
+        - Composant: 'components\extended\Session'
+        - Composant: 'components\extended\TwigWrapper'
 
 
 

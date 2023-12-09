@@ -25,9 +25,7 @@ declare(strict_types=1);
 
 namespace middlewares {
 
-    use components\core\Data;
     use components\core\Request;
-    use components\core\Response;
     use components\extended\Session;
     use components\extended\TwigWrapper;
 
@@ -41,7 +39,7 @@ namespace middlewares {
     class CsrfMiddleware {
 
         /** Se produit lorque le middleware est ajouté à une route
-         * @param Session $session
+         * @param Session $session Gestionnaire de sessions
          * @return void
          */
         public static function __added(Session $session): void {
@@ -57,8 +55,7 @@ namespace middlewares {
 
         /** Fonction exécutée lors de l'utilisation d'un middleware
          * @param Request $request Dernière requète
-         * @param Response $response Dernière réponse
-         * @param Data $data Données personnelles
+         * @param Session $session Gestionnaire de sessions
          * @return void
          */
         public function __invoke(Request $request, Session $session): void {
