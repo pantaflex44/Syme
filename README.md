@@ -5,23 +5,34 @@
 **Syme** est un petit framework PHP aidant à la réalisation d'applications Web. Simple et rapide, ce framework a été conçu pour accélérer le développement tout en restant modulaire et efficace. Applications Web, API Rest, Syme est l'outil incontournable de vos projets.
 
 
-> **Documentation** (*en cours...*):
-> 
-> https://pantaflex44.gitbook.io/documentation-de-syme/
+## Installation
+
+### Automatique
+
+```bash
+$ composer create-project pantaflex44/syme
+```
+
+### Manuelle
+
+**Téléchargement du projet**
+```bash
+$ git clone https://github.com/pantaflex44/Syme.git syme
+$ cd syme
+```
+
+**Installation des dépendances**:
+```bash
+$ composer install
+```
+
+**Edition des configurations**:
+```bash
+$ sudo nano config.php
+```
 
 
-> **Installation des dépendances**:
->   ```bash
->   $ composer install
->   ```
-
-> **Edition des configurations**:
->   ```bash
->   $ sudo nano config.php
->   ```
-
-
-**Exemple d'utilisation**:
+## Exemple d'utilisation
 
 ```php
 <?php
@@ -61,9 +72,17 @@ Route::before('article', function(Request $request, Response $response, Data $da
 
 
 
-# Documentation rapide (v1)
+# Documentation (v1)
 
-## Les composants du Framework (/components/core)
+## Complète
+
+*(en cours...)*
+https://pantaflex44.gitbook.io/documentation-de-syme/
+
+
+## Rapide
+
+### Les composants du Framework (/components/core)
 
 - **Route** : Représente le moteur de routage
 
@@ -210,9 +229,9 @@ Route::before('article', function(Request $request, Response $response, Data $da
 
 
 
-## Les extensions facultatives:
+### Les extensions facultatives:
 
-### Composants disponibles (/components/extended)
+#### Composants disponibles (/components/extended)
 
 - **Session** : Gestionnaire de sessions paramètrable.
 
@@ -381,7 +400,7 @@ Route::before('article', function(Request $request, Response $response, Data $da
         
 
 
-### Middlewares disponibles (/middlewares)
+#### Middlewares disponibles (/middlewares)
 
 - **CsrfMiddleware** : Permet d'ajouter une protection contre les attaques CSRF aux formulaires HTML.
 
