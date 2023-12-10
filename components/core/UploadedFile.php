@@ -21,7 +21,6 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-
 declare(strict_types=1);
 
 namespace components\core {
@@ -29,24 +28,18 @@ namespace components\core {
     /**
      * Fichier uploadé
      */
-    class UploadedFile
-    {
+    class UploadedFile {
 
         protected string $filename;
-
         protected string $filetype;
-
         protected string $tmp_name;
-
         protected int $filesize;
-
         protected int $error;
 
         /** Constructeur
          * @param array $fileinfo Tableau contenant les informations du fichier uploadé
          */
-        public function __construct(array $fileinfo)
-        {
+        public function __construct(array $fileinfo) {
             $this->filename = $fileinfo['name'] ?? '';
             $this->filetype = $fileinfo['type'] ?? '';
             $this->filesize = intval($fileinfo['size'] ?? '0');
@@ -57,35 +50,32 @@ namespace components\core {
         /** Retourne le nom du fichier
          * @return string Nom du fichier
          */
-        public function getName(): string
-        {
+        public function getName(): string {
             return $this->filename;
         }
 
         /** Retourne le type mime du fichier
          * @return string Type mime du fichier
          */
-        public function getType(): string
-        {
+        public function getType(): string {
             return $this->filetype;
         }
 
         /** Retourne la taille en octets du fichier
          * @return int Taille en octets du fichier
          */
-        public function getSize(): int
-        {
+        public function getSize(): int {
             return $this->filesize;
         }
 
         /** Retourne la taille du fichier au format lisible
          * @return string Taille lisible du fichier
          */
-        public function getReadableSize(): string
-        {
+        public function getReadableSize(): string {
             $size = $this->getSize();
 
-            if ($size === 0) return "0.00o";
+            if ($size === 0)
+                return "0.00o";
 
             $s = array('o', 'Ko', 'Mo', 'Go', 'To', 'Po');
             $e = floor(log($size, 1024));
@@ -96,8 +86,7 @@ namespace components\core {
         /** Retourne le type du fichier
          * @return false|string Type du fichier, false en cas d'erreur
          */
-        public function getContentType(): false|string
-        {
+        public function getContentType(): false|string {
             try {
                 return mime_content_type($this->tmp_name);
             } catch (\Exception $ex) {
@@ -108,16 +97,14 @@ namespace components\core {
         /** Retourne le code erreur du versement
          * @return int Code erreur
          */
-        public function getError(): int
-        {
+        public function getError(): int {
             return $this->error;
         }
 
         /** Retourne si le versement du fichier a provoqué une erreur
          * @return bool true, une erreur est apparue, sinon, false
          */
-        public function hasError(): bool
-        {
+        public function hasError(): bool {
             return $this->getError() !== UPLOAD_ERR_OK;
         }
 
@@ -125,8 +112,7 @@ namespace components\core {
          * @param string $directory Chemin du dossier qui sera le receptable du fichier versé
          * @return bool true, le déplacement a été éxécuté avec succès, sinon, false
          */
-        public function moveTo(string $directory): bool
-        {
+        public function moveTo(string $directory): bool {
             try {
                 return move_uploaded_file($this->tmp_name, $directory . DIRECTORY_SEPARATOR . $this->tmp_name);
             } catch (\Exception $ex) {
@@ -134,11 +120,9 @@ namespace components\core {
             }
         }
 
-        public function __toString(): string
-        {
+        public function __toString(): string {
             return $this->getName() . ' | ' . $this->getReadableSize() . ' | ' . ($this->getContentType() ?: 'Aucun type connu');
         }
-
     }
 
 }

@@ -72,7 +72,7 @@ Route::get('bob', '/bob/{id:[0-9]+}/super/{name}', function (int $id, string $na
 });
 
 Route::before('bob', function (Request $request, Response $response, Data $data): void {
-    $data->bob_value = $data->bob;
+    $data->set('bob_value', $data->get('bob'));
 });
 
 Route::map(['GET', 'POST'], 'form', '/form', function (Request $request, Response $response, TwigWrapper $twig): Response {

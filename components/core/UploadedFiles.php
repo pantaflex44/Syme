@@ -21,7 +21,6 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-
 declare(strict_types=1);
 
 namespace components\core {
@@ -29,16 +28,14 @@ namespace components\core {
     /**
      * Liste des fichiers téléversés
      */
-    class UploadedFiles
-    {
+    class UploadedFiles {
 
         protected array $files = [];
 
         /**
          * Constructeur
          */
-        public function __construct()
-        {
+        public function __construct() {
             $this->files = [];
 
             foreach ($_FILES as $elementName => $file) {
@@ -57,7 +54,8 @@ namespace components\core {
                         }
                     }
                 } else {
-                    if (trim($file['name']) !== '') $this->files[$elementName] = new UploadedFile($file);
+                    if (trim($file['name']) !== '')
+                        $this->files[$elementName] = new UploadedFile($file);
                 }
             }
         }
@@ -65,8 +63,7 @@ namespace components\core {
         /** Retourne la liste des fichiers téléversés
          * @return array Liste des fichiers téléversés sous forme d'un tableau associant le nom de l'élément file du formulaire et le fichier téléversé
          */
-        public function getList(): array
-        {
+        public function getList(): array {
             return $this->files;
         }
 
@@ -74,8 +71,7 @@ namespace components\core {
          * @param string $elementName Nom de l'élément file
          * @return bool true, le fichier existe, sinon, false
          */
-        public function hasFile(string $elementName): bool
-        {
+        public function hasFile(string $elementName): bool {
             return array_key_exists($elementName, $this->files);
         }
 
@@ -83,9 +79,9 @@ namespace components\core {
          * @param string $elementName Nom de l'élément file
          * @return UploadedFile|array|false Fichier téléchargé, ou liste de fichiers téléchargés, sinon, false en cas d'erreur
          */
-        public function getFile(string $elementName): UploadedFile|array|false
-        {
-            if (!$this->hasFile($elementName)) return false;
+        public function getFile(string $elementName): UploadedFile|array|false {
+            if (!$this->hasFile($elementName))
+                return false;
 
             return $this->files[$elementName];
         }
@@ -93,10 +89,9 @@ namespace components\core {
         /** Retourne le nombre de fichiers reçus
          * @return int Nombre de fichiers reçus
          */
-        public function count(): int
-        {
-            function counter(array $list): int
-            {
+        public function count(): int {
+
+            function counter(array $list): int {
                 $count = 0;
 
                 foreach ($list as $name => $file) {
@@ -113,11 +108,9 @@ namespace components\core {
             return counter($this->files);
         }
 
-        public function __toString(): string
-        {
+        public function __toString(): string {
             return 'Fichiers reçus: ' . $this->count();
         }
-
     }
 
 }

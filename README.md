@@ -21,7 +21,7 @@
 >   ```
 
 
-### Exemple d'utilisation:
+**Exemple d'utilisation**:
 
 ```php
 <?php
@@ -60,6 +60,156 @@ Route::before('article', function(Request $request, Response $response, Data $da
 ```
 
 
+
+# Documentation rapide (v1)
+
+## Les composants du Framework (/components/core)
+
+- **Route** : Représente le moteur de routage
+
+    *Sources*: https://github.com/pantaflex44/Syme/blob/v1/components/core/Route.php
+
+    *Schéma*:
+
+    - ```::extendWith(string $class): void``` : Ajoute un composant au système de routage pour le rendre accessible dans chaque routes, middlewares, ou autres composants
+    - ```::isAsset(Request $request): string|false``` : Indique si l'url correspond à un fichier à télécharger (fichier dans le dossier '/public')
+    - ```::sendAsset(string $filepath): void``` : Envoie au visiteur le fichier correspondant à l'url (fichier dans le dossier '/public')
+    - ```::exists(string $routeName): bool``` : Indique si une route existe par son nom
+    - ```::match(string $routeName): array|false``` : Retourne les informations d'une route par son nom
+    - ```::isLinked(string $uri, array $methods = ['GET', 'POST', 'OPTIONS', 'PUT', 'PATCH', 'DELETE']): bool``` : Indique si une route est bien attachée à un chemin et à une ou plusieurs méthodes HTTP
+    - ```::getUri(string $routeName, array $params = []): string|false``` : Retourne le chemin associé à une route et spécifiant les attributs
+    - ```::getPath(string $routeName, array $params = []): string|false``` : Retourne le chemin complet associé à une route et spécifiant les attributs
+    - ```::getUrl(string $routeName, array $params = []): string|false``` : Retourne l'url complète associée à une route et spécifiant les attributs
+    - ```::toRequest(string $routeName, array $params = []): Request|false``` : Transforme une route par son nom, en requète HTTP
+    - ```::redirect(string $routeName, array $params = [], int $status = 302): false``` : Redirige le visiteur vers une route en fonction de son nom
+    - ```::apply(Request $request): array``` : Applique la logique d'une route en fonction d'une requète passée en paramètres. Renvoie la requète modifiée et la réponse à envoyer
+    - ```::sendResponse(Request $initialRequest, null|Response $response): void``` : Envoie le contenu d'une réponse en fonction de la requète HTTP
+    - ```::any(string $name, string $uri, callable $callback): void``` : Enregistre une route pour toutes les méthodes HTTP
+    - ```::map(array $methods, string $name, string $uri, callable $callback): void``` : Enregistre une route pour les méthodes HTTP spécifiées
+    - ```::get(string $name, string $uri, callable $callback): void``` : Enregistre une route pour la méthode HTTP GET
+    - ```::post(string $name, string $uri, callable $callback): void``` : Enregistre une route pour la méthode HTTP POST
+    - ```::put(string $name, string $uri, callable $callback): void``` : Enregistre une route pour la méthode HTTP PUT
+    - ```::patch(string $name, string $uri, callable $callback): void``` : Enregistre une route pour la méthode HTTP PATCH
+    - ```::delete(string $name, string $uri, callable $callback): void``` : Enregistre une route pour la méthode HTTP DELETE
+    - ```::before(?string $routeName, callable|string $middleware): void``` : Enregistre un middleware devant s'exécuter avant la logique d'une route
+    - ```::after(?string $routeName, callable|string $middleware): void``` : Enregistre un middleware devant s'exécuter après la logique d'une route
+
+
+- **Request** : Représente la requète HTTP courante
+
+    *Sources*: https://github.com/pantaflex44/Syme/blob/v1/components/core/Request.php
+
+    *Schéma*:
+
+    - ```__construct(string $url = null)``` : Constructeur
+    - ```::current(): Request``` : Retourne la requète courante
+    - ```getPath(): string``` : Retourne le chemin de l'url
+    - ```getUri(): string``` : Retourne la portion d'url correspondante au chemin
+    - ```getQueryString(): array``` : Retourne la liste des attributs de l'url
+    - ```getFragment(): string``` : Retourne le fragment de l'url
+    - ```getScheme(): string``` : Retourne le schéma HTTP
+    - ```getHost(): string``` : Retourne l'hôte
+    - ```getPort(): int``` : Retourne le port utilisé par l'hôte
+    - ```getDomain(): string``` : Retourne le domaine complet
+    - ```getMethod(): string``` : Retourne la méthode HTTP
+    - ```getAcceptedLanguage(): array``` : Retourne la liste des languages acceptés
+    - ```getAcceptedEncoding(): array``` : Retourne la liste des encodages acceptés
+    - ```getAcceptedTypes(): array``` : Retourne la liste des types de données acceptés
+    - ```getUserAgent(): string``` : Retourne l'agent HTTP
+    - ```getRemoteAddress(): string``` : Retourne l'adresse IP du visiteur
+    - ```getRemotePort(): int``` : Retourne le numéro du port utilisé par le visiteur
+    - ```getUrl(bool $full = false): string``` : Retourne l'url correspondante
+    - ```hasArgument(string $name): bool``` : Indique si l'url contient des attributs
+    - ```getArgument(string $name): false|string``` : Retourne un attribut par son nom
+    - ```isXHRRequest(): bool``` : Indique si c'est une requète AJAX
+    - ```hasHeader(string $header): bool``` : Indique si une entète HTTP existe
+    - ```getHeaders(): array``` : Retourne la liste des entètes HTTP
+    - ```getHeader(string $header): false|string``` : Retourne une entète HTTP par son nom
+    - ```getAuthorization(): string``` : Retourne le jeton d'authorisation
+    - ```getContent(): mixed``` : Retourne le contenu de la requète
+    - ```getContentType(): string``` : Retourne le type du contenu de la requète
+    - ```getForm(): null|object``` : Retourne le contenu d'un formulaire HTML
+    - ```hasForm(): bool``` : Indique si la requète contient un formlaire HTML
+    - ```getFiles(): UploadedFiles``` : Retourne la liste des fichiers téléversés
+    - ```getReferer(): bool|string``` : Retourne l'url de la page précédente
+
+
+- **Response** : Représente la réponse HTTP à renvoyer au visiteur
+
+    *Sources*: https://github.com/pantaflex44/Syme/blob/v1/components/core/Response.php
+
+    *Schéma*:
+
+    - ```__construct(string $body = '', string $contentType = 'text/html')``` : Constructeur
+    - ```hasHeader(string $header): bool``` : Indique si une entète HTTP a été ajoutée
+    - ```removeHeader(string $headerKey): bool``` : Supprime une entète HTTP
+    - ```getHeaders(): array``` : Retourne la liste des entètes HTTP
+    - ```getHeader(string $header): false|string``` : Retourne une entète HTTP
+    - ```withHeader(string $header): Response``` : Ajoute une entète HTTP
+    - ```withBearerAuthorization(string $bearer): Response``` : Ajoute un un jeton d'authorization
+    - ```withHeaders(array $headers): Response``` : Ajoute une liste d'entètes HTTP
+    - ```getStatus(): int``` : Retourne le status HTTP courant
+    - ```withStatus(int $status): Response``` : Modifie le status de la réponse HTTP
+    - ```getContent(): string``` : Retourne le contenu brut de la réponse HTTP
+    - ```getGzipContent(): string``` : Retourne le contenu compressé de la réponse HTTP
+    - ```getContentType(): string``` : Retourne le type mime du contenu de la réponse
+    - ```getParsed(): array``` : Retourne le contenu décomposé de la réponse HTTP. (XML, Json, multipart, form, data)
+    - ```getJson(bool $associative = true): mixed``` : Retourne le contenu au format Json
+    - ```clear(): Response``` : Supprime le contenu de la réponse
+    - ```write(string $content, string $contentType = 'text/html'): Response``` : Modifie le contenu de la réponse HTTP
+    - ```prepend(string $content): Response``` : Ajoute du contenu avant la réponse HTTP
+    - ```append(string $content): Response``` : Ajoute du contenu après la réponse HTTP
+    - ```writeObject(mixed $object): Response``` : Tranforme un objet PHP en contenu Json puis l'écrit dans la réponse HTTP
+    - ```writeJson(string $json): Response``` : Ecrit du contenu Json dans la réponse HTTP
+
+
+- **Data** : Représente le conteneur de données personnelles capable de traverser l'ensemble des logiques (Routes, Middleswares, Composants)
+
+    *Sources*: https://github.com/pantaflex44/Syme/blob/v1/components/core/Data.php
+
+    *Schéma*:
+
+    - ```__construct()``` : Constructeur.
+    - ```count(): int``` : Retourne le nombre de données enregistrées
+    - ```clear(): void``` : Supprime toutes les données
+    - ```all(): array``` : Retourne toutes les données enregistrées
+    - ```exists(string $key): bool``` : Indique si une donnée existe par le nom de sa clef
+    - ```get(string $key): mixed``` : Retourne la valeur d'une donnée en fonction du nom de sa clef
+    - ```set(string $key, mixed $value): void``` : Modifie la valeur d'une donnée
+    - ```delete(string $key): void``` : Supprime une donnée en fonction de sa clef
+
+
+- **UploadedFile** : Représente la réponse HTTP à renvoyer au visiteur
+
+    *Sources*: https://github.com/pantaflex44/Syme/blob/v1/components/core/UploadedFile.php
+
+    *Schéma*:
+
+    - ```__construct(array $fileinfo)``` : Constructeur
+    - ```getName(): string``` : Retourne le nom du fichier
+    - ```getType(): string``` : Retourne le type du fichier
+    - ```getSize(): int``` : Retourne la taille du fichier
+    - ```getReadableSize(): string``` : Retourne la taille du fichier (au format lisible)
+    - ```getContentType(): false|string``` : Retourne le type mime du contenu du fichier
+    - ```getError(): int``` : Retourne le numéro de l'erreur ou UPLOAD_ERR_OK si aucune erreur
+    - ```hasError(): bool``` : Indique si le téléversement comporte une erreur
+    - ```moveTo(string $directory): bool``` : Déplace le fichier téléversé dans le dossier de son choix
+
+
+- **UploadedFiles** : Représente la liste des fichiers téléversés
+
+    *Sources*: https://github.com/pantaflex44/Syme/blob/v1/components/core/UploadedFiles.php
+
+    *Schéma*:
+
+    - ```__construct()``` : Constructeur
+    - ```getList(): array``` : Retourne la liste des fichiers téléversés
+    - ```hasFile(string $elementName): bool``` : Indique si un fichier est téléversé par le nom du champ de formulaire HTML
+    - ```getFile(string $elementName): UploadedFile|array|false``` : Retourne le fichier téléversé par le nom du champ de formulaire HTML
+    - ```count(): int``` : Retourne le nombre de fichiers téléversés
+
+
+
 ## Les extensions facultatives:
 
 ### Composants disponibles (/components/extended)
@@ -88,10 +238,10 @@ Route::before('article', function(Request $request, Response $response, Data $da
 
     - ```__construct()``` : Constructeur
     - ```destroy(): void``` : Nettoie et supprime tout le contenu de la session en cours
-    - ```exists(string $name): bool``` : Retourne si une clef existe
-    - ```get(string $name): mixed``` : Retourne la valeur d'une clef
+    - ```exists(string $name): bool``` : Retourne si une clef existe par son nom
+    - ```get(string $name): mixed``` : Retourne la valeur d'une clef par son nom
     - ```set(string $name, mixed $value): void``` : Défini la valeur d'une clef
-    - ```delete(string $name): void``` : Supprime une clef et sa valeur
+    - ```delete(string $name): void``` : Supprime une clef et sa valeur par son nom
 
     *Exemple*:
 
