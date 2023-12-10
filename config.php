@@ -26,7 +26,7 @@ declare(strict_types=1);
 // Framework Syme
 define('DEBUG', false);
 define('CORE_NAME', 'Syme');
-define('CORE_VERSION', '1.0.0');
+define('CORE_VERSION', '1.0.1');
 define('ROOT_PATH', dirname($_SERVER['SCRIPT_NAME']));
 define('ASSETS_PATH', __DIR__ . '/public');
 define('USE_COMPRESSION', true);

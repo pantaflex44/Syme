@@ -71,7 +71,7 @@ namespace components\core {
          * @param callable $callback Function à appeler en cas de détection de la route
          * @return bool true, la nouvelle règle est enregistrée, sinon, false
          */
-        private static function store(string $name, array $methods, string $uri, callable $callback): bool {
+        private static function store(string $name, array $methods, string $uri, callable|string $callback): bool {
             $name = strtolower(trim($name));
             if (self::exists($name))
                 return false;
@@ -92,9 +92,6 @@ namespace components\core {
             if (str_ends_with($uri, '/'))
                 $uri = substr($uri, 0, strlen($uri) - 1);
             if (self::isLinked($uri, $methods))
-                return false;
-
-            if (!is_callable($callback))
                 return false;
 
             $route = [];
@@ -544,25 +541,35 @@ namespace components\core {
                 if (preg_match($details['route'], self::$request->getUri(), $matches, PREG_UNMATCHED_AS_NULL)) {
                     $found = true;
 
-                    if (is_callable($details['callback'])) {
-                        $callbackParams = [];
-                        foreach ($details['params'] as $param) {
-                            if (isset($matches[$param])) {
-                                $value = trim($matches[$param]);
-                                $callbackParams[$param] = parse_value($value, true);
-                            }
+                    $callbackParams = [];
+                    foreach ($details['params'] as $param) {
+                        if (isset($matches[$param])) {
+                            $value = trim($matches[$param]);
+                            $callbackParams[$param] = parse_value($value, true);
                         }
+                    }
 
-                        self::applyBeforeMiddleware($name, $callbackParams);
+                    self::applyBeforeMiddleware($name, $callbackParams);
 
+                    if (is_callable($details['callback'])) {
                         $func = new \ReflectionFunction($details['callback']);
                         $params = self::paramsInjection($func, nameDependencies: $callbackParams);
                         self::$response = $func->invokeArgs($params);
-
-                        self::applyAfterMiddleware($name, $callbackParams);
-
-                        $called = true;
+                    } elseif (gettype($details['callback']) === 'string') {
+                        $class = new \ReflectionClass($details['callback']);
+                        if ($class->hasMethod('__invoke')) {
+                            $method = $class->getMethod('__invoke');
+                            $params = self::paramsInjection($method, nameDependencies: $callbackParams);
+                            self::$response = $method->invokeArgs(new $details['callback'], $params);
+                        }
+                    } else {
+                        header("HTTP/1.1 422 Unprocessable Entity");
+                        exit;
                     }
+
+                    self::applyAfterMiddleware($name, $callbackParams);
+
+                    $called = true;
 
                     break;
                 }
@@ -640,7 +647,7 @@ namespace components\core {
          * @param callable $callback Fonction à appeler en cas de détection
          * @return void
          */
-        public static function any(string $name, string $uri, callable $callback): void {
+        public static function any(string $name, string $uri, callable|string $callback): void {
             self::store($name, ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'], $uri, $callback);
         }
 
@@ -656,7 +663,7 @@ namespace components\core {
          * @param callable $callback Fonction à appeler en cas de détection
          * @return void
          */
-        public static function map(array $methods, string $name, string $uri, callable $callback): void {
+        public static function map(array $methods, string $name, string $uri, callable|string $callback): void {
             self::store($name, $methods, $uri, $callback);
         }
 
@@ -672,7 +679,7 @@ namespace components\core {
          * @param callable $callback Fonction à appeler en cas de détection
          * @return void
          */
-        public static function get(string $name, string $uri, callable $callback): void {
+        public static function get(string $name, string $uri, callable|string $callback): void {
             self::store($name, ['GET'], $uri, $callback);
         }
 
@@ -688,7 +695,7 @@ namespace components\core {
          * @param callable $callback Fonction à appeler en cas de détection
          * @return void
          */
-        public static function post(string $name, string $uri, callable $callback): void {
+        public static function post(string $name, string $uri, callable|string $callback): void {
             self::store($name, ['POST'], $uri, $callback);
         }
 
@@ -704,7 +711,7 @@ namespace components\core {
          * @param callable $callback Fonction à appeler en cas de détection
          * @return void
          */
-        public static function put(string $name, string $uri, callable $callback): void {
+        public static function put(string $name, string $uri, callable|string $callback): void {
             self::store($name, ['PUT'], $uri, $callback);
         }
 
@@ -720,7 +727,7 @@ namespace components\core {
          * @param callable $callback Fonction à appeler en cas de détection
          * @return void
          */
-        public static function patch(string $name, string $uri, callable $callback): void {
+        public static function patch(string $name, string $uri, callable|string $callback): void {
             self::store($name, ['PATCH'], $uri, $callback);
         }
 
@@ -736,7 +743,7 @@ namespace components\core {
          * @param callable $callback Fonction à appeler en cas de détection
          * @return void
          */
-        public static function delete(string $name, string $uri, callable $callback): void {
+        public static function delete(string $name, string $uri, callable|string $callback): void {
             self::store($name, ['DELETE'], $uri, $callback);
         }
 
