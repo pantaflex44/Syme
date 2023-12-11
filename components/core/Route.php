@@ -306,6 +306,8 @@ namespace components\core {
             $time = date('r', filemtime($filepath));
             $range = $_SERVER['HTTP_RANGE'] ?? null;
 
+            $download = Request::current()->hasArgument("download");
+
             $fm = @fopen($filepath, 'rb');
             if (!$fm) {
                 header('HTTP/1.1 500 Internal server error');
@@ -313,16 +315,24 @@ namespace components\core {
             }
 
             $begin = 0;
-            $end = $size - 1;
-            if (!is_null($range)) {
-                if (preg_match('/bytes=\h*(\d+)-(\d*)[\D.*]?/i', $range, $matches)) {
-                    $begin = intval($matches[1]);
-                    if (!empty($matches[2]))
-                        $end = intval($matches[2]);
-                }
-                header('HTTP/1.1 206 Partial Content');
+
+            if ($download) {
+                header('Content-Disposition: attachment; filename=' . basename($filepath));
             } else {
-                header('HTTP/1.1 200 OK');
+                $end = $size - 1;
+                if (!is_null($range)) {
+                    if (preg_match('/bytes=\h*(\d+)-(\d*)[\D.*]?/i', $range, $matches)) {
+                        $begin = intval($matches[1]);
+                        if (!empty($matches[2]))
+                            $end = intval($matches[2]);
+                    }
+                    header('HTTP/1.1 206 Partial Content');
+                    header("Content-Range: bytes $begin-$end/$size");
+                } else {
+                    header('HTTP/1.1 200 OK');
+                }
+
+                header('Content-Disposition: inline; filename=' . basename($filepath));
             }
 
             header("Content-Type: $mimetype");
@@ -330,9 +340,6 @@ namespace components\core {
             header('Pragma: no-cache');
             header('Accept-Ranges: bytes');
             header('Content-Length:' . (($end - $begin) + 1));
-            if (!is_null($range))
-                header("Content-Range: bytes $begin-$end/$size");
-            header('Content-Disposition: inline; filename=' . basename($filepath));
             header("Content-Transfer-Encoding: binary");
             header("Last-Modified: $time");
 
