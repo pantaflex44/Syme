@@ -406,6 +406,46 @@ namespace components\core {
 
             return false;
         }
+        
+        /** Retourne les détails d'une route associée à une URI
+         * @param string $uri URI à vérifier
+         * @return null|array null, en cas d'erreur ou de lien non trouvé, sinon, les détails de la route associée
+         */
+        public static function getLink(string $uri): null|array {
+            $uri = trim($uri);
+            if (!str_starts_with($uri, '/'))
+                $uri = '/' . $uri;
+            if (str_ends_with($uri, '/'))
+                $uri = substr($uri, 0, strlen($uri) - 1);
+
+            foreach (self::$routes as $name => $details) {
+                if (strtolower($details['uri']) === strtolower($uri)) {
+                    return $details;
+                }
+            }
+
+            return null;
+        }
+
+        /** Retourne le nom de la route associée à une URI
+         * @param string $uri URI à vérifier
+         * @return null|string null, en cas d'erreur ou de lien non trouvé, sinon, le nom de la route associée
+         */
+        public static function getRouteName(string $uri): null|string {
+            $uri = trim($uri);
+            if (!str_starts_with($uri, '/'))
+                $uri = '/' . $uri;
+            if (str_ends_with($uri, '/'))
+                $uri = substr($uri, 0, strlen($uri) - 1);
+
+            foreach (self::$routes as $name => $details) {
+                if (strtolower($details['uri']) === strtolower($uri)) {
+                    return $name;
+                }
+            }
+
+            return null;
+        }
 
         /** Retourne le chemin d'une route par son nom, en appliquant les attributs passés en paramètres
          *
