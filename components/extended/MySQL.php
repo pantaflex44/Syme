@@ -54,7 +54,7 @@ namespace components\extended {
             if (!defined('MYSQL_DATABASE'))
                 throw new \Exception("MYSQL_DATABASE parameter not defined in config file.");
 
-            Route::extendWith(Pdo::class);
+            Route::extendWith(MySQL::class);
         }
 
         protected ?\PDO $instance = null;
