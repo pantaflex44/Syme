@@ -181,9 +181,9 @@ function removeDir(string $dirname): void {
         $dir = new RecursiveDirectoryIterator($dirname, RecursiveDirectoryIterator::SKIP_DOTS);
         foreach (new RecursiveIteratorIterator($dir, RecursiveIteratorIterator::CHILD_FIRST) as $object) {
             if ($object->isFile()) {
-                unlink($object);
+                unlink(strval($object));
             } elseif ($object->isDir()) {
-                rmdir($object);
+                rmdir(strval($object));
             }
         }
         rmdir($dirname);
@@ -200,7 +200,7 @@ function copyDir(string $src, string $dest): void {
         if ($item->isDir()) {
             mkdir($dest . DIRECTORY_SEPARATOR . $iterator->getSubPathname());
         } else {
-            copy($item, $dest . DIRECTORY_SEPARATOR . $iterator->getSubPathname());
+            copy(strval($item), $dest . DIRECTORY_SEPARATOR . $iterator->getSubPathname());
         }
     }
 }
