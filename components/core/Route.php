@@ -25,7 +25,20 @@ declare(strict_types=1);
 
 namespace components\core {
 
+    use Exception;
     use JetBrains\PhpStorm\NoReturn;
+    use ReflectionClass;
+    use ReflectionException;
+    use ReflectionFunction;
+    use ReflectionMethod;
+    use const ASSETS_PACKET_SIZE;
+    use const ASSETS_PATH;
+    use const CACHE_DELAY;
+    use const USE_CACHE;
+    use const USE_COMPRESSION;
+    use function parse_value;
+    use function str_ends_with;
+    use function str_starts_with;
 
     class Route {
 
@@ -155,14 +168,14 @@ namespace components\core {
             self::$middlewares[$order][$routeName][] = $middleware;
 
             try {
-                $class = new \ReflectionClass($middleware);
+                $class = new ReflectionClass($middleware);
                 if ($class->hasMethod('__added')) {
                     $method = $class->getMethod('__added');
                     $params = self::paramsInjection($method);
                     $method->invokeArgs(null, $params);
                 }
-            } catch (\Exception $ex) {
-
+            } catch (Exception $ex) {
+                
             }
         }
 
@@ -173,7 +186,7 @@ namespace components\core {
          * @param Response $response Réponse courante
          * @param Data $data Données personnelles
          * @return void
-         * @throws \ReflectionException
+         * @throws ReflectionException
          */
         private static function applyMiddleware(string $order, string $routeName, array $namedParameters = []): void {
             $middlewares = array_merge(
@@ -183,11 +196,11 @@ namespace components\core {
 
             foreach ($middlewares as $middleware) {
                 if (is_callable($middleware)) {
-                    $method = new \ReflectionFunction($middleware);
+                    $method = new ReflectionFunction($middleware);
                     $params = self::paramsInjection($method, nameDependencies: $namedParameters);
                     $method->invokeArgs($params);
                 } elseif (gettype($middleware) === 'string') {
-                    $class = new \ReflectionClass($middleware);
+                    $class = new ReflectionClass($middleware);
                     if ($class->hasMethod('__invoke')) {
                         $method = $class->getMethod('__invoke');
                         $params = self::paramsInjection($method, nameDependencies: $namedParameters);
@@ -214,20 +227,20 @@ namespace components\core {
          * @param Response $response Réponse courante
          * @param Data $data Données personnelles
          * @return void
-         * @throws \ReflectionException
+         * @throws ReflectionException
          */
         private static function applyAfterMiddleware(string $routeName, array $namedParameters = []): void {
             self::applyMiddleware('after', $routeName, $namedParameters);
         }
 
         /** Permet l'injection de paramètres
-         * @param \ReflectionFunction|\ReflectionMethod|null $method Méthode ou fonction
+         * @param ReflectionFunction|ReflectionMethod|null $method Méthode ou fonction
          * @param array $typeDependencies Liste des dépendances par types [Object::class => instance]
          * @param array $nameDependencies Liste des dépendances par nom ['id' => value]
          * @return array Tableau associatif des dépendances injectées
-         * @throws \ReflectionException
+         * @throws ReflectionException
          */
-        private static function paramsInjection(\ReflectionFunction|\ReflectionMethod|null $method, array $typeDependencies = [], array $nameDependencies = []): array {
+        private static function paramsInjection(ReflectionFunction|ReflectionMethod|null $method, array $typeDependencies = [], array $nameDependencies = []): array {
             if (is_null($method))
                 return [];
 
@@ -260,7 +273,7 @@ namespace components\core {
                     $params[$name] = $fullTypeDependencies[$type];
                 } elseif (in_array($type, $components)) {
                     if (is_null(self::$components[$type])) {
-                        $class = new \ReflectionClass($type);
+                        $class = new ReflectionClass($type);
                         $ctor = $class->getConstructor();
                         $ctorParams = self::paramsInjection($ctor, $typeDependencies, $nameDependencies);
                         self::$components[$type] = $class->newInstanceArgs($ctorParams);
@@ -301,7 +314,7 @@ namespace components\core {
          * @return void
          */
         #[NoReturn] public static function sendAsset(string $filepath): void {
-            $mimetype = mime_content_type($filepath);
+            $mimetype = getRealMimeType($filepath);
             $size = filesize($filepath);
             $time = date('r', filemtime($filepath));
             $range = $_SERVER['HTTP_RANGE'] ?? null;
@@ -406,7 +419,7 @@ namespace components\core {
 
             return false;
         }
-        
+
         /** Retourne les détails d'une route associée à une URI
          * @param string $uri URI à vérifier
          * @return null|array null, en cas d'erreur ou de lien non trouvé, sinon, les détails de la route associée
@@ -573,7 +586,7 @@ namespace components\core {
         /** Applique la logique d'une route en fonction de la requète HTTP passée en paramètre
          * @param Request $request Requète à analyser
          * @return array Response déduite à envoyer
-         * @throws \ReflectionException
+         * @throws ReflectionException
          */
         public static function apply(Request $request): array {
             $found = false;
@@ -599,11 +612,11 @@ namespace components\core {
                     self::applyBeforeMiddleware($name, $callbackParams);
 
                     if (is_callable($details['callback'])) {
-                        $func = new \ReflectionFunction($details['callback']);
+                        $func = new ReflectionFunction($details['callback']);
                         $params = self::paramsInjection($func, nameDependencies: $callbackParams);
                         self::$response = $func->invokeArgs($params);
                     } elseif (gettype($details['callback']) === 'string') {
-                        $class = new \ReflectionClass($details['callback']);
+                        $class = new ReflectionClass($details['callback']);
                         if ($class->hasMethod('__invoke')) {
                             $method = $class->getMethod('__invoke');
                             $params = self::paramsInjection($method, nameDependencies: $callbackParams);
