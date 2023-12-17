@@ -26,6 +26,21 @@ declare(strict_types=1);
 namespace components\extended {
 
     use components\core\Route;
+    use Exception;
+    use const CORE_NAME;
+    use const ROOT_PATH;
+    use const SESSION_CACHE_LIMITER;
+    use const SESSION_COOKIE_HTTPONLY;
+    use const SESSION_COOKIE_PATH;
+    use const SESSION_COOKIE_SAMESITE;
+    use const SESSION_COOKIE_SECURE;
+    use const SESSION_LIFETIME;
+    use const SESSION_URL_REWRITER_TAGS;
+    use const SESSION_USE_COOKIES;
+    use const SESSION_USE_ONLY_COOKIES;
+    use const SESSION_USE_STRICT_MODE;
+    use const SESSION_USE_TRANS_ID;
+    use function getRealIp;
 
     /**
      * Gestionnaire de Sessions
@@ -51,7 +66,7 @@ namespace components\extended {
          */
         public static function __required(): void {
             if (!defined('ROOT_PATH'))
-                throw new \Exception("ROOT_PATH parameter not defined in config file.");
+                throw new Exception("ROOT_PATH parameter not defined in config file.");
 
             ini_set('session.use_cookies', defined('SESSION_USE_COOKIES') ? SESSION_USE_COOKIES : 1);
             ini_set('session.use_only_cookies', defined('SESSION_USE_ONLY_COOKIES') ? SESSION_USE_ONLY_COOKIES : 1);
@@ -68,7 +83,25 @@ namespace components\extended {
             Route::extendWith(Session::class);
         }
 
-        public function __construct() {
+        private function clearSession(): void {
+            $_SESSION = [];
+
+            $params = session_get_cookie_params();
+            setcookie(
+                    session_name(),
+                    '',
+                    time() - 42000,
+                    $params['path'],
+                    $params['domain'],
+                    $params['secure'],
+                    $params['httponly']
+            );
+
+            session_unset();
+            session_destroy();
+        }
+
+        private function startSession(): void {
             session_name(CORE_NAME);
             session_start();
 
@@ -87,10 +120,14 @@ namespace components\extended {
             }
 
             if (!$valid) {
-                clearSession();
-                startSession();
+                $this->clearSession();
+                $this->startSession();
                 exit;
             }
+        }
+
+        public function __construct() {
+            $this->startSession();
         }
 
         /** Arrête et nettoie le gestionnaire de session
