@@ -419,9 +419,83 @@ https://pantaflex44.gitbook.io/documentation-de-syme/
     Pour chaque route ayant ajoutée avant son exécution (Route::before) le middleware ```CsrfMiddleware::class```, une vérification de la présence des 2 champs nécessaires, ainsi
     que la vérification des valeurs attendues, sont effectuées. En cas de manquement, une réponse 403 est renvoyée. En cas de mauvaises valeurs, une réponse 401 est renvoyée.
 
+<br /><br />
+
+---
+
+### Utiliser Bootstrap
+
+En premier lieu, il faut installer ```Bootstrap``` via *Composer*:
+
+```bash
+$ composer require twbs/bootstrap
+
+```
+
+
+Ensuite, il faut créer le fichier ```bootstrap.install``` nécessaire au déploiement de ```Bootstrap``` à la racine du projet:
+
+```php
+<?php
+
+require_once(__DIR__ . '/functions.php');
+
+$bootstrapVendorDir = __DIR__ . '/vendor/twbs/bootstrap/dist';
+$bootstrapDir = __DIR__ . '/public/bootstrap';
+if (is_dir($bootstrapDir)) removeDir($bootstrapDir);
+
+mkdir($bootstrapDir, 0755);
+copyDir($bootstrapVendorDir, $bootstrapDir);
+
+```
+
+
+Puis, modifier le fichier ```composer.json```:
+
+```json
+...
+"scripts": {
+    "post-update-cmd": [
+        "@php bootstrap.install"
+    ]
+}
+...
+
+```
+
+
+Pour utiliser ```Bootstrap```, vous devez l'inclure dans vos future projet:
+
+```html
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Mon projet</title>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <script src="./bootstrap/js/bootstrap.min.js"></script>
+        <link href="./bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+        
+    </head>
+    <body>
+        Je suis le projet.
+    </body>
+</html>
+
+```
+
+
+**C'est aussi simple que ça ;-)**
+
+Vous pouvez désormais utiliser ```Bootstrap``` dans vos futurs projets.
 
 
 <br /><br />
+
+---
+
+<br />
 <div style="text-align: center;">
 
 ![Syme](./Syme.png)
