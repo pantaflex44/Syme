@@ -65,7 +65,7 @@ function getRealIp(): string {
  * @param bool $sanitize
  * @return array|string|int|bool|float|DateTime Valeur nouvellement typée
  */
-function parse_value(string|array $value, bool $sanitize = false): array|string|int|bool|float|\DateTime {
+function parse_value(string|array $value, bool $sanitize = false): array|string|int|bool|float|DateTime {
     $entry = $value;
     if (!is_array($entry)) {
         $entry = [$entry];
@@ -92,9 +92,9 @@ function parse_value(string|array $value, bool $sanitize = false): array|string|
         } else {
             if ($result !== "") {
                 try {
-                    $result = new \DateTime($result);
-                } catch (\Exception $e) {
-
+                    $result = new DateTime($result);
+                } catch (Exception $e) {
+                    
                 }
             }
         }
@@ -159,4 +159,48 @@ function get_classname_in_phpfile(string $file): string {
     }
 
     return $namespace . $class;
+}
+
+/** DateInterval to seconds
+ * @param DateInterval $interval
+ * @return int Seconds
+ */
+function dateintervalToSeconds(DateInterval $interval): int {
+    $daysInSecs = $interval->format('%r%a') * 24 * 60 * 60;
+    $hoursInSecs = $interval->format('%r%h') * 60 * 60;
+    $minsInSecs = $interval->format('%r%i') * 60;
+    return $daysInSecs + $hoursInSecs + $minsInSecs + $interval->format('%r%s');
+}
+
+/** Supprimer un dossier et son contenu
+ * @param string $dirname Dossier à supprimer
+ * @return void
+ */
+function removeDir(string $dirname): void {
+    if (is_dir($dirname)) {
+        $dir = new RecursiveDirectoryIterator($dirname, RecursiveDirectoryIterator::SKIP_DOTS);
+        foreach (new RecursiveIteratorIterator($dir, RecursiveIteratorIterator::CHILD_FIRST) as $object) {
+            if ($object->isFile()) {
+                unlink($object);
+            } elseif ($object->isDir()) {
+                rmdir($object);
+            }
+        }
+        rmdir($dirname);
+    }
+}
+
+/** Copie un dossier et son contenu vers une destination
+ * @param string $src Dossier à copier
+ * @param string $dest Destination de la copie
+ * @return void
+ */
+function copyDir(string $src, string $dest): void {
+    foreach ($iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($src, RecursiveDirectoryIterator::SKIP_DOTS), RecursiveIteratorIterator::SELF_FIRST) as $item) {
+        if ($item->isDir()) {
+            mkdir($dest . DIRECTORY_SEPARATOR . $iterator->getSubPathname());
+        } else {
+            copy($item, $dest . DIRECTORY_SEPARATOR . $iterator->getSubPathname());
+        }
+    }
 }
