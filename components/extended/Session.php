@@ -102,21 +102,26 @@ namespace components\extended {
         }
 
         private function startSession(): void {
-            session_name(CORE_NAME);
-            session_start();
-
             $valid = true;
 
-            if (isset($_SESSION['REMOTE_ADDR'])) {
-                $valid &= ($_SESSION['REMOTE_ADDR'] == getRealIp());
-            } else {
-                $_SESSION['REMOTE_ADDR'] = getRealIp();
+            try {
+                session_name(CORE_NAME);
+                session_start();
+            } catch (\Exception $ex) {
+                $valid = false;
             }
 
-            if (isset($_SESSION['HTTP_USER_AGENT'])) {
-                $valid &= ($_SESSION['HTTP_USER_AGENT'] == $_SERVER['HTTP_USER_AGENT']);
-            } else {
-                $_SESSION['HTTP_USER_AGENT'] = $_SERVER['HTTP_USER_AGENT'];
+            if ($valid) {
+                if (isset($_SESSION['REMOTE_ADDR'])) {
+                    $valid &= ($_SESSION['REMOTE_ADDR'] == getRealIp());
+                } else {
+                    $_SESSION['REMOTE_ADDR'] = getRealIp();
+                }
+                if (isset($_SESSION['HTTP_USER_AGENT'])) {
+                    $valid &= ($_SESSION['HTTP_USER_AGENT'] == $_SERVER['HTTP_USER_AGENT']);
+                } else {
+                    $_SESSION['HTTP_USER_AGENT'] = $_SERVER['HTTP_USER_AGENT'];
+                }
             }
 
             if (!$valid) {
