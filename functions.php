@@ -291,3 +291,60 @@ function getRealMimeType(string $filepath): string {
 
     return $mimetype;
 }
+
+/** Retourne un nouveau jeton sécurisé
+ * @return string Jeton sécurisé
+ */
+function secureToken(): string
+{
+    $token = openssl_random_pseudo_bytes(16);
+    $token = bin2hex($token);
+
+    return $token;
+}
+
+/** Génère un mot de passe sécurisé
+ * @param type $length Taille du mot de passe
+ * @param type $add_dashes
+ * @param type $available_sets
+ * @return string
+ */
+function generateStrongPassword($length = 12, $add_dashes = false, $available_sets = 'luds'): string
+{
+	$sets = array();
+	if(strpos($available_sets, 'l') !== false)
+		$sets[] = 'abcdefghjkmnpqrstuvwxyz';
+	if(strpos($available_sets, 'u') !== false)
+		$sets[] = 'ABCDEFGHJKMNPQRSTUVWXYZ';
+	if(strpos($available_sets, 'd') !== false)
+		$sets[] = '23456789';
+	if(strpos($available_sets, 's') !== false)
+		$sets[] = '!@#$%&*?';
+
+	$all = '';
+	$password = '';
+	foreach($sets as $set)
+	{
+		$password .= $set[array_rand(str_split($set))];
+		$all .= $set;
+	}
+
+	$all = str_split($all);
+	for($i = 0; $i < $length - count($sets); $i++)
+		$password .= $all[array_rand($all)];
+
+	$password = str_shuffle($password);
+
+	if(!$add_dashes)
+		return $password;
+
+	$dash_len = floor(sqrt($length));
+	$dash_str = '';
+	while(strlen($password) > $dash_len)
+	{
+		$dash_str .= substr($password, 0, $dash_len) . '-';
+		$password = substr($password, $dash_len);
+	}
+	$dash_str .= $password;
+	return $dash_str;
+}

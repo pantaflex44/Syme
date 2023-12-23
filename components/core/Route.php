@@ -36,6 +36,7 @@ namespace components\core {
     use const CACHE_DELAY;
     use const USE_CACHE;
     use const USE_COMPRESSION;
+    use function getRealMimeType;
     use function parse_value;
     use function str_ends_with;
     use function str_starts_with;
@@ -341,11 +342,11 @@ namespace components\core {
                     }
                     header('HTTP/1.1 206 Partial Content');
                     header("Content-Range: bytes $begin-$end/$size");
+                    header('Content-Disposition: inline; filename=' . basename($filepath));
+                    header("Content-Transfer-Encoding: binary");
                 } else {
                     header('HTTP/1.1 200 OK');
                 }
-
-                header('Content-Disposition: inline; filename=' . basename($filepath));
             }
 
             header("Content-Type: $mimetype");
@@ -353,7 +354,6 @@ namespace components\core {
             header('Pragma: no-cache');
             header('Accept-Ranges: bytes');
             header('Content-Length:' . (($end - $begin) + 1));
-            header("Content-Transfer-Encoding: binary");
             header("Last-Modified: $time");
 
             $cur = $begin;
@@ -451,8 +451,11 @@ namespace components\core {
             if (str_ends_with($uri, '/'))
                 $uri = substr($uri, 0, strlen($uri) - 1);
 
+            if ($uri === '')
+                $uri = '/';
+
             foreach (self::$routes as $name => $details) {
-                if (strtolower($details['uri']) === strtolower($uri)) {
+                if (preg_match($details['route'], $uri, $matches)) {
                     return $name;
                 }
             }

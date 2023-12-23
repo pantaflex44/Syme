@@ -39,6 +39,7 @@
         "ext-fileinfo": "*",
         "ext-simplexml": "*",
         "ext-libxml": "*",
-        "ext-zlib": "*"
+        "ext-zlib": "*",
+        "phpmailer/phpmailer": "^6.9"
     }
 }

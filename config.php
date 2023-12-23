@@ -26,7 +26,7 @@ declare(strict_types=1);
 // Framework Syme
 define('DEBUG', false);
 define('CORE_NAME', 'Syme');
-define('CORE_VERSION', '1.0.4');
+define('CORE_VERSION', '1.1.0');
 define('ROOT_PATH', dirname($_SERVER['SCRIPT_NAME']));
 define('ASSETS_PATH', __DIR__ . '/public');
 define('USE_COMPRESSION', true);
@@ -53,4 +53,16 @@ define('MYSQL_PORT', 3306);
 define('MYSQL_DATABASE', 'syme');
 define('MYSQL_USERNAME', 'user');
 define('MYSQL_PASSWORD', '');
+
+// composant: Mailler
+define('SMTP_HOST', '');
+define('SMTP_PORT', 587);
+define('SMTP_AUTH', true);
+define('SMTP_USERNAME', '');
+define('SMTP_PASSWORD', '');
+define('SMTP_SECURE', 'tls');
+define('SMTP_FROM_NAME', 'Syme');
+define('SMTP_FROM_MAIL', 'contact@syme.com');
+define('SMTP_REPLY_NAME', 'Syme');
+define('SMTP_REPLY_MAIL', 'contact@syme.com');
 

@@ -80,9 +80,9 @@ namespace components\extended {
                 $exists = (bool) $stmt->fetchColumn();
                 if (!$exists) {
                     $pdo->exec(sprintf("CREATE DATABASE IF NOT EXISTS %s CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;", MYSQL_DATABASE));
-                    $pdo->exec("DEFAULT CHARACTER SET utf8;");
+                    $pdo->exec("DEFAULT CHARACTER SET utf8mb4;");
                     $pdo->exec("DEFAULT COLLATE utf8_general_ci;");
-                    $pdo->exec("SET default_storage_engine = INNODB;");
+                    $pdo->exec("SET default_storage_engine = InnoDB;");
                 }
 
                 $pdo->exec(sprintf("USE %s;", MYSQL_DATABASE));

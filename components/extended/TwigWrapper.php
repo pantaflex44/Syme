@@ -45,6 +45,7 @@ namespace components\extended {
         private Response $response;
         protected static array $filters = [];
         protected static array $functions = [];
+        protected array $params = [];
 
         /** Se produit lorsque le composant est chargé
          * @return void
@@ -128,6 +129,24 @@ namespace components\extended {
             $this->response = $response;
         }
 
+        /** Définit un paramètre global
+         * @param string $key Nom de la clef
+         * @param mixed $value Valeur de la clef
+         * @return void
+         */
+        public function addParam(string $key, mixed $value): void {
+            $this->params[$key] = $value;
+        }
+
+        /** Supprime un paramètre
+         * @param string $key Nom de la clef
+         * @return void
+         */
+        public function deleteParam(string $key): void {
+            if (isset($this->params[$key]))
+                unset($this->params[$key]);
+        }
+
         /** Compile et rend le contenu d'un modèle
          * @param string $templateName Nom du modèle
          * @param array $data Données à intégrer
@@ -137,6 +156,8 @@ namespace components\extended {
          * @throws \Twig\Error\SyntaxError
          */
         public function createResponse(string $templateName, array $data = [], bool $toCurrentResponse = true): Response {
+            $data = [...$data, ...$this->params, 'ROOT_PATH' => ROOT_PATH];
+
             $content = $this->twig->render($templateName, $data);
 
             if ($toCurrentResponse) {
@@ -148,6 +169,18 @@ namespace components\extended {
             } else {
                 return new Response($content, 'text/html');
             }
+        }
+
+        /** Compile le contenu d'un modèle et renvoie son contenu
+         * @param string $templateName Nom du modèle
+         * @param array $data Données à intégrer
+         * @return string
+         */
+        public function toString(string $templateName, array $data = []): string {
+            $data = [...$data, ...$this->params, 'ROOT_PATH' => ROOT_PATH];
+
+            $content = $this->twig->render($templateName, $data);
+            return $content;
         }
     }
 
