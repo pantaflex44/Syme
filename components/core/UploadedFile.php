@@ -88,12 +88,12 @@ namespace components\core {
          */
         public function getContentType(): false|string {
             try {
-                return mime_content_type($this->tmp_name);
+                return getRealMimeType($this->tmp_name);
             } catch (\Exception $ex) {
                 return false;
             }
         }
-
+        
         /** Retourne le code erreur du versement
          * @return int Code erreur
          */

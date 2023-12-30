@@ -119,6 +119,28 @@ namespace components\extended {
                 'charset' => 'utf-8'
             ]);
 
+            $this->twig->addFilter(new TwigFilter('length',
+                            function (mixed $value): int {
+                                if (is_countable($value) || is_iterable($value))
+                                    return count($value);
+                                if (is_string($value))
+                                    return strlen($value);
+                                return 0;
+                            })
+            );
+
+            $this->twig->addFilter(new TwigFilter('pluralize',
+                            function (mixed $count, string $singular, string $plural, string $zero = null): string {
+                                $count = is_null($count) ? 0 : intval($count);
+                                if ($count > 1) {
+                                    return str_replace('{}', $count, $plural);
+                                } else if ($count <= 0 && !is_null($zero)) {
+                                    return $zero; // No string replacement required for zero
+                                }
+                                return str_replace('{}', strval($count), $singular);
+                            })
+            );
+
             foreach (TwigWrapper::$filters as $filter) {
                 $this->twig->addFilter($filter);
             }
@@ -134,7 +156,7 @@ namespace components\extended {
          * @param mixed $value Valeur de la clef
          * @return void
          */
-        public function addParam(string $key, mixed $value): void {
+        public function setParam(string $key, mixed $value): void {
             $this->params[$key] = $value;
         }
 
@@ -156,7 +178,7 @@ namespace components\extended {
          * @throws \Twig\Error\SyntaxError
          */
         public function createResponse(string $templateName, array $data = [], bool $toCurrentResponse = true): Response {
-            $data = [...$data, ...$this->params, 'ROOT_PATH' => ROOT_PATH];
+            $data = [...$this->params, ...$data, 'ROOT_PATH' => ROOT_PATH];
 
             $content = $this->twig->render($templateName, $data);
 

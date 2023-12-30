@@ -295,8 +295,7 @@ function getRealMimeType(string $filepath): string {
 /** Retourne un nouveau jeton sécurisé
  * @return string Jeton sécurisé
  */
-function secureToken(): string
-{
+function secureToken(): string {
     $token = openssl_random_pseudo_bytes(16);
     $token = bin2hex($token);
 
@@ -309,42 +308,100 @@ function secureToken(): string
  * @param type $available_sets
  * @return string
  */
-function generateStrongPassword($length = 12, $add_dashes = false, $available_sets = 'luds'): string
-{
-	$sets = array();
-	if(strpos($available_sets, 'l') !== false)
-		$sets[] = 'abcdefghjkmnpqrstuvwxyz';
-	if(strpos($available_sets, 'u') !== false)
-		$sets[] = 'ABCDEFGHJKMNPQRSTUVWXYZ';
-	if(strpos($available_sets, 'd') !== false)
-		$sets[] = '23456789';
-	if(strpos($available_sets, 's') !== false)
-		$sets[] = '!@#$%&*?';
+function generateStrongPassword($length = 12, $add_dashes = false, $available_sets = 'luds'): string {
+    $sets = array();
+    if (strpos($available_sets, 'l') !== false)
+        $sets[] = 'abcdefghjkmnpqrstuvwxyz';
+    if (strpos($available_sets, 'u') !== false)
+        $sets[] = 'ABCDEFGHJKMNPQRSTUVWXYZ';
+    if (strpos($available_sets, 'd') !== false)
+        $sets[] = '23456789';
+    if (strpos($available_sets, 's') !== false)
+        $sets[] = '!@#$%&*?';
 
-	$all = '';
-	$password = '';
-	foreach($sets as $set)
-	{
-		$password .= $set[array_rand(str_split($set))];
-		$all .= $set;
-	}
+    $all = '';
+    $password = '';
+    foreach ($sets as $set) {
+        $password .= $set[array_rand(str_split($set))];
+        $all .= $set;
+    }
 
-	$all = str_split($all);
-	for($i = 0; $i < $length - count($sets); $i++)
-		$password .= $all[array_rand($all)];
+    $all = str_split($all);
+    for ($i = 0; $i < $length - count($sets); $i++)
+        $password .= $all[array_rand($all)];
 
-	$password = str_shuffle($password);
+    $password = str_shuffle($password);
 
-	if(!$add_dashes)
-		return $password;
+    if (!$add_dashes)
+        return $password;
 
-	$dash_len = floor(sqrt($length));
-	$dash_str = '';
-	while(strlen($password) > $dash_len)
-	{
-		$dash_str .= substr($password, 0, $dash_len) . '-';
-		$password = substr($password, $dash_len);
-	}
-	$dash_str .= $password;
-	return $dash_str;
+    $dash_len = floor(sqrt($length));
+    $dash_str = '';
+    while (strlen($password) > $dash_len) {
+        $dash_str .= substr($password, 0, $dash_len) . '-';
+        $password = substr($password, $dash_len);
+    }
+    $dash_str .= $password;
+    return $dash_str;
+}
+
+/** Vérifie la solidité d'un mot de passe
+ * @param string $password Mot de passe à vérifier
+ * @param int $minLength Longueur du mot de passe désiré
+ * @param bool $hasUppercase Possède au moins une majuscule
+ * @param bool $hasLowercase Possède au moins une minuscule
+ * @param bool $hasNumber Possède au moins un chiffre
+ * @param bool $hasSpecial Possède au moins un caractère spécial
+ * @return bool
+ */
+function passwordGoodStrength(string $password, int $minLength = 8, bool $hasUppercase = true, bool $hasLowercase = true, bool $hasNumber = true, bool $hasSpecial = true): bool {
+    $password = trim($password);
+
+    $uppercase = $hasUppercase ? preg_match('@[A-Z]@', $password) : true;
+    $lowercase = $hasLowercase ? preg_match('@[a-z]@', $password) : true;
+    $number = $hasNumber ? preg_match('@[0-9]@', $password) : true;
+    $specialChars = $hasSpecial ? preg_match('@[^\w]@', $password) : true;
+
+    return !(!$uppercase || !$lowercase || !$number || !$specialChars || strlen($password) < $minLength);
+}
+
+/** Retourne la taille maximale, en octets, admise pour le téléversement de fichiers
+ * @return float
+ */
+function getFileUploadMaxSize(): float {
+    $maxSize = -1;
+    $parseSize = function (string $size): float {
+        $unit = preg_replace('/[^bkmgtpezy]/i', '', $size);
+        $size = preg_replace('/[^0-9\.]/', '', $size);
+
+        if ($unit) {
+            return round($size * pow(1024, stripos('bkmgtpezy', $unit[0])));
+        } else {
+            return round($size);
+        }
+    };
+
+    $postMaxSize = $parseSize(ini_get('post_max_size'));
+    if ($postMaxSize > 0) {
+        $maxSize = $postMaxSize;
+    }
+
+    $uploadMax = $parseSize(ini_get('upload_max_filesize'));
+    if ($uploadMax > 0 && $uploadMax < $maxSize) {
+        $maxSize = $uploadMax;
+    }
+
+    return $maxSize;
+}
+
+function humanFilesize(float $bytes, int $dec = 2): string {
+    $size = array('o', 'Ko', 'Mo', 'Go', 'To', 'Po', 'Eo', 'Zo', 'Yo');
+    $factor = floor((strlen(strval($bytes)) - 1) / 3);
+    if ($factor == 0)
+        $dec = 0;
+
+    $sz = $bytes / (1024 ** $factor);
+    $dec = floor($sz) === $sz ? 0 : $dec;
+
+    return sprintf("%.{$dec}f %s", $sz, $size[$factor]);
 }
