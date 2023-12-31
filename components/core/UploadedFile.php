@@ -54,6 +54,12 @@ namespace components\core {
             return $this->filename;
         }
 
+        public function getExtension(): string {
+            $infos = pathinfo($this->filename);
+            $extension = strtolower($infos['extension']);
+            return $extension;
+        }
+
         /** Retourne le type mime du fichier
          * @return string Type mime du fichier
          */
@@ -93,7 +99,7 @@ namespace components\core {
                 return false;
             }
         }
-        
+
         /** Retourne le code erreur du versement
          * @return int Code erreur
          */
@@ -112,9 +118,10 @@ namespace components\core {
          * @param string $directory Chemin du dossier qui sera le receptable du fichier versé
          * @return bool true, le déplacement a été éxécuté avec succès, sinon, false
          */
-        public function moveTo(string $directory): bool {
+        public function moveTo(string $directory, string $filename = null): bool {
             try {
-                return move_uploaded_file($this->tmp_name, $directory . DIRECTORY_SEPARATOR . $this->tmp_name);
+                $to = $directory . DIRECTORY_SEPARATOR . ($filename ?? $this->tmp_name);
+                return move_uploaded_file($this->tmp_name, $to);
             } catch (\Exception $ex) {
                 return false;
             }
