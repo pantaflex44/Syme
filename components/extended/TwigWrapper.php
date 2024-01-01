@@ -133,7 +133,7 @@ namespace components\extended {
                             function (mixed $count, string $singular, string $plural, string $zero = null): string {
                                 $count = is_null($count) ? 0 : intval($count);
                                 if ($count > 1) {
-                                    return str_replace('{}', $count, $plural);
+                                    return str_replace('{}', strval($count), $plural);
                                 } else if ($count <= 0 && !is_null($zero)) {
                                     return $zero; // No string replacement required for zero
                                 }
