@@ -28,10 +28,16 @@ namespace components\extended {
     use components\core\Response;
     use components\core\Route;
     use Composer\InstalledVersions;
+    use Exception;
     use Twig\Environment;
+    use Twig\Error\LoaderError;
+    use Twig\Error\RuntimeError;
+    use Twig\Error\SyntaxError;
     use Twig\Loader\FilesystemLoader;
     use Twig\TwigFilter;
     use Twig\TwigFunction;
+    use const DEBUG;
+    use const ROOT_PATH;
 
     /**
      * Permet l'utilisation de la librairie Twig avec Syme.
@@ -78,15 +84,15 @@ namespace components\extended {
 
         /** Constructeur
          * @param Response $response
-         * @throws \Exception
+         * @throws Exception
          */
-        public function __construct(Response $response) {
+        public function __construct(Response $response, Route $route) {
             if (!InstalledVersions::isInstalled('twig/twig')) {
-                throw new \Exception("Twig package not loaded. Please run 'composer install' before use your application.");
+                throw new Exception("Twig package not loaded. Please run 'composer install' before use your application.");
             } else {
                 $twigVersion = InstalledVersions::getVersion('twig/twig');
                 if (!version_compare($twigVersion, '3.0.0.0', '>=')) {
-                    throw new \Exception("Bad version of Twig package. More or equals than 3.0.0.0 expected.");
+                    throw new Exception("Bad version of Twig package. More or equals than 3.0.0.0 expected.");
                 }
             }
 
@@ -95,10 +101,10 @@ namespace components\extended {
                 mkdir($templatePath, 0744);
             }
             if (!is_readable($templatePath)) {
-                throw new \Exception("No readable template path.");
+                throw new Exception("No readable template path.");
             }
             if (!is_writable($templatePath)) {
-                throw new \Exception("No writable template path.");
+                throw new Exception("No writable template path.");
             }
 
             $cachePath = defined('TWIG_CACHE_PATH') ? constant('TWIG_CACHE_PATH') : $templatePath . '/cache';
@@ -106,10 +112,10 @@ namespace components\extended {
                 mkdir($cachePath, 0744);
             }
             if (!is_readable($cachePath)) {
-                throw new \Exception("No readable cache path.");
+                throw new Exception("No readable cache path.");
             }
             if (!is_writable($cachePath)) {
-                throw new \Exception("No writable cache path.");
+                throw new Exception("No writable cache path.");
             }
 
             $loader = new FilesystemLoader($templatePath);
@@ -140,6 +146,16 @@ namespace components\extended {
                                 return str_replace('{}', strval($count), $singular);
                             })
             );
+
+            $this->twig->addFilter(new TwigFilter('frenchPhoneFormatter',
+                            function (string $value): string {
+                                return preg_replace('/(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/', '\1 \2 \3 \4 \5', $value);
+                            })
+            );
+
+            $this->twig->addFunction(new TwigFunction('getUrl', function (string $routeName, array $params = []) use ($route): string {
+                                return $route::getUrl($routeName, $params) ?: '';
+                            }));
 
             foreach (TwigWrapper::$filters as $filter) {
                 $this->twig->addFilter($filter);
@@ -173,9 +189,9 @@ namespace components\extended {
          * @param string $templateName Nom du modèle
          * @param array $data Données à intégrer
          * @return Response
-         * @throws \Twig\Error\LoaderError
-         * @throws \Twig\Error\RuntimeError
-         * @throws \Twig\Error\SyntaxError
+         * @throws LoaderError
+         * @throws RuntimeError
+         * @throws SyntaxError
          */
         public function createResponse(string $templateName, array $data = [], bool $toCurrentResponse = true): Response {
             $data = [...$this->params, ...$data, 'ROOT_PATH' => ROOT_PATH];
