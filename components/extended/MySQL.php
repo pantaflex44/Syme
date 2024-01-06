@@ -134,10 +134,12 @@ namespace components\extended {
          * @param array|null $args Tableau d'arguments de la requète
          * @return int Nombre d'enregistrements concernées par les changements
          */
-        public function execute(string $sql, ?array $args = null): int {
+        public function execute(string $sql, ?array $args = null, &$id = false): int {
             try {
                 $stmt = $this->instance->prepare($sql);
                 $stmt->execute($args);
+                
+                $id = $this->instance->lastInsertId();
 
                 return $stmt->rowCount();
             } catch (\Exception $ex) {
@@ -214,6 +216,22 @@ namespace components\extended {
                 return $stmt->fetchAll() ?? [];
             } catch (\Exception $ex) {
                 return [];
+            }
+        }
+        
+        /** Retourne le nombre d'enregistrements supprimés
+         * @param string $sql Requète SQL à éxecuter. (eg: SELECT * FROM ...)
+         * @param array|null $args Tableau d'arguments de la requète
+         * @return int Nombre d'enregistrements supprimés
+         */
+        public function delete(string $sql, ?array $args = null): int {
+            try {
+                $stmt = $this->instance->prepare($sql);
+                $stmt->execute($args);
+
+                return $stmt->rowCount();
+            } catch (\Exception $ex) {
+                return 0;
             }
         }
     }
